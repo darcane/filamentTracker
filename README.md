@@ -18,7 +18,7 @@ A full-stack TypeScript application for tracking 3D printer filament inventory w
 
 - **Frontend**: React 18 + TypeScript + Vite + Material-UI
 - **Backend**: Node.js + Express + TypeScript
-- **Database**: JSON file storage (easily migratable to SQLite/PostgreSQL)
+- **Database**: SQLite with better-sqlite3 (fast, reliable, Git-friendly)
 - **API**: RESTful endpoints with CORS support
 
 ## Project Structure
@@ -35,9 +35,10 @@ FilamentTracker/
 ├── backend/                 # Express backend API
 │   ├── src/
 │   │   ├── routes/          # API route handlers
-│   │   ├── services/        # Business logic
+│   │   ├── services/        # Business logic & database
+│   │   ├── scripts/         # Migration scripts
 │   │   └── types/           # Shared TypeScript types
-│   └── data/               # JSON data storage
+│   └── data/               # SQLite database storage
 └── README.md
 ```
 
@@ -86,6 +87,20 @@ The backend will run on `http://localhost:5000`
 
 The frontend will run on `http://localhost:3000`
 
+### Database Migration (if upgrading from JSON)
+
+If you have existing JSON data, run the migration script:
+
+```bash
+cd backend
+npm run migrate
+```
+
+This will:
+- Import existing JSON data to SQLite
+- Create a backup of your JSON file
+- Set up the database with proper indexes
+
 ## API Endpoints
 
 ### Filaments
@@ -96,6 +111,12 @@ The frontend will run on `http://localhost:3000`
 - `PUT /api/filaments/:id` - Update filament
 - `DELETE /api/filaments/:id` - Delete filament
 - `PATCH /api/filaments/:id/reduce` - Reduce filament amount
+
+### Analytics Endpoints
+
+- `GET /api/filaments/stats/total` - Get total filament count
+- `GET /api/filaments/stats/value` - Get total inventory value by currency
+- `GET /api/filaments/stats/brands` - Get brand statistics
 
 ### Health Check
 

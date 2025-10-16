@@ -336,4 +336,107 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/filaments/stats/total:
+ *   get:
+ *     summary: Get total filament count
+ *     description: Get the total number of filaments in the inventory
+ *     tags: [Filaments]
+ *     responses:
+ *       200:
+ *         description: Total count retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                   example: 25
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/stats/total', async (req: Request, res: Response) => {
+  try {
+    const total = await storageService.getTotalFilaments();
+    res.json({ total });
+  } catch (error) {
+    console.error('Error fetching total count:', error);
+    res.status(500).json({ error: 'Failed to fetch total count' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/filaments/stats/value:
+ *   get:
+ *     summary: Get total inventory value by currency
+ *     description: Get the total value of all filaments grouped by currency
+ *     tags: [Filaments]
+ *     responses:
+ *       200:
+ *         description: Total value retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   currency:
+ *                     type: string
+ *                     example: "SEK"
+ *                   total:
+ *                     type: number
+ *                     example: 1650.50
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/stats/value', async (req: Request, res: Response) => {
+  try {
+    const value = await storageService.getTotalValue();
+    res.json(value);
+  } catch (error) {
+    console.error('Error fetching total value:', error);
+    res.status(500).json({ error: 'Failed to fetch total value' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/filaments/stats/brands:
+ *   get:
+ *     summary: Get brand statistics
+ *     description: Get the count of filaments grouped by brand
+ *     tags: [Filaments]
+ *     responses:
+ *       200:
+ *         description: Brand statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   brand:
+ *                     type: string
+ *                     example: "Bambu Lab"
+ *                   count:
+ *                     type: number
+ *                     example: 5
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/stats/brands', async (req: Request, res: Response) => {
+  try {
+    const brands = await storageService.getBrandStats();
+    res.json(brands);
+  } catch (error) {
+    console.error('Error fetching brand stats:', error);
+    res.status(500).json({ error: 'Failed to fetch brand statistics' });
+  }
+});
+
 export default router;

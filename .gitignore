@@ -247,10 +247,16 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Database files (if you switch from JSON to SQLite later)
+# Database files
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
+
+# JSON data files (migrated to SQLite)
+backend/data/*.json
+backend/data/*.json.backup
 
 # Backup files
 *.bak
