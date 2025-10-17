@@ -16,6 +16,7 @@ import {
 } from '@mui/icons-material';
 import { Filament } from '../types/filament';
 import BrandLogo from './BrandLogo';
+import { useResponsive } from '../hooks/useMediaQuery';
 
 interface FilamentCardProps {
   filament: Filament;
@@ -30,8 +31,26 @@ const FilamentCard: React.FC<FilamentCardProps> = ({
   onReduce,
   getColorChipColor,
 }) => {
+  const { isMobile } = useResponsive();
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Card 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        elevation: 2,
+        '&:hover': {
+          elevation: 4,
+        },
+        // Ensure proper contrast in both light and dark modes
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: (theme) => theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 4px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       <CardContent sx={{ flexGrow: 1 }}>
         {/* Brand and Logo */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -91,7 +110,7 @@ const FilamentCard: React.FC<FilamentCardProps> = ({
       <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
         <Tooltip title="Reduce Amount">
           <IconButton
-            size="medium"
+            size={isMobile ? "medium" : "small"}
             onClick={() => onReduce(filament)}
             color="warning"
             sx={{ minHeight: '48px', minWidth: '48px' }}
@@ -101,7 +120,7 @@ const FilamentCard: React.FC<FilamentCardProps> = ({
         </Tooltip>
         <Tooltip title="Delete">
           <IconButton
-            size="medium"
+            size={isMobile ? "medium" : "small"}
             onClick={() => onDelete(filament)}
             color="error"
             sx={{ minHeight: '48px', minWidth: '48px' }}

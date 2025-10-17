@@ -21,10 +21,14 @@ import {
   Alert,
   Tooltip,
   Grid,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   Remove as RemoveIcon,
+  ViewList as TableViewIcon,
+  ViewModule as GridViewIcon,
 } from '@mui/icons-material';
 import { Filament, BRAND_OPTIONS, FILAMENT_TYPE_OPTIONS, TYPE_MODIFIER_OPTIONS } from '../types/filament';
 import { filamentApi } from '../services/api';
@@ -45,6 +49,8 @@ interface FilamentTableProps {
 type SortField = keyof Filament;
 type SortDirection = 'asc' | 'desc';
 
+type ViewMode = 'table' | 'grid';
+
 const FilamentTable: React.FC<FilamentTableProps> = ({
   filaments,
   loading,
@@ -60,7 +66,16 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [filamentToDelete, setFilamentToDelete] = useState<Filament | null>(null);
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    // Load view preference from localStorage, default to 'grid' for mobile/tablet, 'table' for desktop
+    const saved = localStorage.getItem('filament-view-mode');
+    if (saved === 'table' || saved === 'grid') {
+      return saved;
+    }
+    // Default based on screen size
+    return window.innerWidth >= 900 ? 'table' : 'grid';
+  });
+  const { isMobile } = useResponsive();
 
   // Filter and sort filaments
   const filteredAndSortedFilaments = useMemo(() => {
@@ -96,6 +111,13 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleViewModeChange = (_event: React.MouseEvent<HTMLElement>, newViewMode: ViewMode | null) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+      localStorage.setItem('filament-view-mode', newViewMode);
     }
   };
 
@@ -166,10 +188,42 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom sx={{ userSelect: 'none', cursor: 'default' }}>
-        Filament Inventory ({filteredAndSortedFilaments.length} items)
-      </Typography>
+    <Paper 
+      sx={{ 
+        p: 3,
+        // Enhanced contrast for dark mode
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: (theme) => theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 4px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" sx={{ userSelect: 'none', cursor: 'default' }}>
+          Filament Inventory ({filteredAndSortedFilaments.length} items)
+        </Typography>
+        
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="view mode"
+          size={isMobile ? "medium" : "small"}
+        >
+          <ToggleButton value="table" aria-label="table view">
+            <Tooltip title="Table View">
+              <TableViewIcon />
+            </Tooltip>
+          </ToggleButton>
+          <ToggleButton value="grid" aria-label="grid view">
+            <Tooltip title="Grid View">
+              <GridViewIcon />
+            </Tooltip>
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       {/* Filters */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -254,8 +308,8 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
 
       </Box>
 
-      {/* Desktop Table */}
-      {isDesktop && (
+      {/* Table View */}
+      {viewMode === 'table' && (
         <TableContainer sx={{ userSelect: 'none' }}>
           <Table sx={{ userSelect: 'none' }}>
             <TableHead>
@@ -353,11 +407,18 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
         </TableContainer>
       )}
 
-      {/* Mobile/Tablet Card Layout */}
-      {(isMobile || isTablet) && (
+      {/* Grid View */}
+      {viewMode === 'grid' && (
         <Grid container spacing={2}>
           {filteredAndSortedFilaments.map((filament) => (
-            <Grid item xs={12} sm={6} key={filament.id}>
+            <Grid 
+              item 
+              xs={12} 
+              sm={6} 
+              md={4} 
+              lg={3} 
+              key={filament.id}
+            >
               <FilamentCard
                 filament={filament}
                 onDelete={handleDeleteClick}

@@ -161,7 +161,18 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <Paper 
+      sx={{ 
+        p: 3,
+        // Enhanced contrast for dark mode
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: (theme) => theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 4px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <NotesIcon color="primary" />
@@ -186,7 +197,24 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
         <Grid container spacing={2}>
           {notes.map((note) => (
             <Grid item xs={12} sm={6} md={4} key={note.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card 
+                sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  elevation: 2,
+                  '&:hover': {
+                    elevation: 4,
+                  },
+                  // Ensure proper contrast in both light and dark modes
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  boxShadow: (theme) => theme.palette.mode === 'dark' 
+                    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+                    : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                }}
+              >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Typography variant="h6" component="h3" sx={{ flexGrow: 1, mr: 1, userSelect: 'none', cursor: 'default' }}>

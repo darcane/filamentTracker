@@ -78,7 +78,18 @@ const FilamentForm: React.FC<FilamentFormProps> = ({ onFilamentAdded, onError })
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <Paper 
+      sx={{ 
+        p: 3,
+        // Enhanced contrast for dark mode
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: (theme) => theme.palette.mode === 'dark' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 4px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       <Typography variant="h6" gutterBottom>
         Add New Filament
       </Typography>
