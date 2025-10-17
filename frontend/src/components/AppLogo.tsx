@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 
 interface AppLogoProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: 'xsmall' | 'small' | 'medium' | 'large';
   showText?: boolean;
   variant?: 'horizontal' | 'vertical' | 'icon-only';
 }
@@ -14,6 +14,8 @@ const AppLogo: React.FC<AppLogoProps> = ({
 }) => {
   const getSizeConfig = () => {
     switch (size) {
+      case 'xsmall':
+        return { iconSize: 20, fontSize: 14, spacing: 0.5 };
       case 'small':
         return { iconSize: 24, fontSize: 16, spacing: 1 };
       case 'large':

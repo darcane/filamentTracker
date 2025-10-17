@@ -29,7 +29,7 @@ import {
   Notes as NotesIcon,
 } from '@mui/icons-material';
 import { Note, CreateNoteRequest, NOTE_CATEGORIES } from '../types/note';
-import { notesApi } from '../services/notesApi';
+import { useResponsive } from '../hooks/useMediaQuery';
 
 interface NotesSectionProps {
   onError: (error: string) => void;
@@ -45,6 +45,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
     content: '',
     category: 'Spool Weights',
   });
+  const { isMobile } = useResponsive();
 
   useEffect(() => {
     loadNotes();
@@ -221,16 +222,18 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
                   </Typography>
                   <Box>
                     <IconButton
-                      size="small"
+                      size={isMobile ? "medium" : "small"}
                       onClick={() => handleOpenDialog(note)}
                       color="primary"
+                      sx={{ minHeight: '48px', minWidth: '48px' }}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
-                      size="small"
+                      size={isMobile ? "medium" : "small"}
                       onClick={() => handleDelete(note.id)}
                       color="error"
+                      sx={{ minHeight: '48px', minWidth: '48px' }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -242,7 +245,13 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
         </Grid>
       )}
 
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+      <Dialog 
+        open={dialogOpen} 
+        onClose={handleCloseDialog} 
+        maxWidth="md" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle sx={{ userSelect: 'none', cursor: 'default' }}>
           {editingNote ? 'Edit Note' : 'Add New Note'}
         </DialogTitle>

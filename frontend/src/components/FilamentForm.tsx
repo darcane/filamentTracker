@@ -14,7 +14,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { CreateFilamentRequest, BRAND_OPTIONS, FILAMENT_TYPE_OPTIONS, TYPE_MODIFIER_OPTIONS, COLOR_OPTIONS, CURRENCY_OPTIONS } from '../types/filament';
+import { CreateFilamentRequest, BRAND_OPTIONS, FILAMENT_TYPE_OPTIONS, TYPE_MODIFIER_OPTIONS, CURRENCY_OPTIONS } from '../types/filament';
 import { filamentApi } from '../services/api';
 
 interface FilamentFormProps {
@@ -202,7 +202,10 @@ const FilamentForm: React.FC<FilamentFormProps> = ({ onFilamentAdded, onError })
               fullWidth
               startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
               disabled={loading}
-              sx={{ height: '56px' }}
+              sx={{ 
+                height: { xs: '48px', sm: '56px' },
+                minHeight: '48px'
+              }}
             >
               {loading ? 'Adding...' : 'Add Filament'}
             </Button>

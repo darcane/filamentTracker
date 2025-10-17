@@ -20,6 +20,7 @@ import {
   CircularProgress,
   Alert,
   Tooltip,
+  Grid,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -29,6 +30,8 @@ import { Filament, BRAND_OPTIONS, FILAMENT_TYPE_OPTIONS, TYPE_MODIFIER_OPTIONS }
 import { filamentApi } from '../services/api';
 import BrandLogo from './BrandLogo';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import FilamentCard from './FilamentCard';
+import { useResponsive } from '../hooks/useMediaQuery';
 
 interface FilamentTableProps {
   filaments: Filament[];
@@ -45,7 +48,6 @@ type SortDirection = 'asc' | 'desc';
 const FilamentTable: React.FC<FilamentTableProps> = ({
   filaments,
   loading,
-  onFilamentUpdated,
   onFilamentDeleted,
   onFilamentReduced,
   onError,
@@ -58,6 +60,7 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [filamentToDelete, setFilamentToDelete] = useState<Filament | null>(null);
+  const { isMobile, isTablet, isDesktop } = useResponsive();
 
   // Filter and sort filaments
   const filteredAndSortedFilaments = useMemo(() => {
@@ -78,6 +81,7 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
       const aValue = a[sortField];
       const bValue = b[sortField];
       
+      if (aValue == null || bValue == null) return 0;
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -173,11 +177,20 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
           label="Search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          size="small"
-          sx={{ minWidth: 200 }}
+          size={isMobile ? "medium" : "small"}
+          sx={{ 
+            minWidth: { xs: '100%', sm: 200 },
+            flexGrow: { xs: 1, sm: 0 }
+          }}
         />
         
-        <FormControl size="small" sx={{ minWidth: 120 }}>
+        <FormControl 
+          size={isMobile ? "medium" : "small"} 
+          sx={{ 
+            minWidth: { xs: '100%', sm: 120 },
+            flexGrow: { xs: 1, sm: 0 }
+          }}
+        >
           <InputLabel>Brand</InputLabel>
           <Select
             value={brandFilter}
@@ -193,7 +206,13 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 120 }}>
+        <FormControl 
+          size={isMobile ? "medium" : "small"} 
+          sx={{ 
+            minWidth: { xs: '100%', sm: 120 },
+            flexGrow: { xs: 1, sm: 0 }
+          }}
+        >
           <InputLabel>Type</InputLabel>
           <Select
             value={typeFilter}
@@ -211,7 +230,13 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        <FormControl 
+          size={isMobile ? "medium" : "small"} 
+          sx={{ 
+            minWidth: { xs: '100%', sm: 140 },
+            flexGrow: { xs: 1, sm: 0 }
+          }}
+        >
           <InputLabel>Modifier</InputLabel>
           <Select
             value={modifierFilter}
@@ -229,102 +254,120 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
 
       </Box>
 
-      {/* Table */}
-      <TableContainer sx={{ userSelect: 'none' }}>
-        <Table sx={{ userSelect: 'none' }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Brand</TableCell>
-              <TableCell sx={{ userSelect: 'none' }}>
-                <TableSortLabel
-                  active={sortField === 'filamentType'}
-                  direction={sortField === 'filamentType' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('filamentType')}
-                >
-                  Type
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Modifier</TableCell>
-              <TableCell sx={{ userSelect: 'none' }}>
-                <TableSortLabel
-                  active={sortField === 'color'}
-                  direction={sortField === 'color' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('color')}
-                >
-                  Color
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right" sx={{ userSelect: 'none' }}>
-                <TableSortLabel
-                  active={sortField === 'amount'}
-                  direction={sortField === 'amount' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('amount')}
-                >
-                  Amount (g)
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right" sx={{ userSelect: 'none' }}>
-                <TableSortLabel
-                  active={sortField === 'cost'}
-                  direction={sortField === 'cost' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('cost')}
-                >
-                  Cost
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredAndSortedFilaments.map((filament) => (
-              <TableRow key={filament.id} hover>
-                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <BrandLogo brand={filament.brand} size={24} />
-                    {filament.brand}
-                  </Box>
+      {/* Desktop Table */}
+      {isDesktop && (
+        <TableContainer sx={{ userSelect: 'none' }}>
+          <Table sx={{ userSelect: 'none' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Brand</TableCell>
+                <TableCell sx={{ userSelect: 'none' }}>
+                  <TableSortLabel
+                    active={sortField === 'filamentType'}
+                    direction={sortField === 'filamentType' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('filamentType')}
+                  >
+                    Type
+                  </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.filamentType}</TableCell>
-                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.typeModifier || 'Standard'}</TableCell>
-                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
-                  <Chip
-                    label={filament.color}
-                    size="small"
-                    color={getColorChipColor(filament.color)}
-                    variant="outlined"
-                  />
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Modifier</TableCell>
+                <TableCell sx={{ userSelect: 'none' }}>
+                  <TableSortLabel
+                    active={sortField === 'color'}
+                    direction={sortField === 'color' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('color')}
+                  >
+                    Color
+                  </TableSortLabel>
                 </TableCell>
-                <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>{filament.amount.toLocaleString()}</TableCell>
-                <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>
-                  {filament.cost.toFixed(2)} {filament.currency}
+                <TableCell align="right" sx={{ userSelect: 'none' }}>
+                  <TableSortLabel
+                    active={sortField === 'amount'}
+                    direction={sortField === 'amount' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('amount')}
+                  >
+                    Amount (g)
+                  </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Reduce Amount">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleReduceAmount(filament)}
-                        color="warning"
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteClick(filament)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                <TableCell align="right" sx={{ userSelect: 'none' }}>
+                  <TableSortLabel
+                    active={sortField === 'cost'}
+                    direction={sortField === 'cost' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('cost')}
+                  >
+                    Cost
+                  </TableSortLabel>
                 </TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredAndSortedFilaments.map((filament) => (
+                <TableRow key={filament.id} hover>
+                  <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BrandLogo brand={filament.brand} size={24} />
+                      {filament.brand}
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.filamentType}</TableCell>
+                  <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.typeModifier || 'Standard'}</TableCell>
+                  <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
+                    <Chip
+                      label={filament.color}
+                      size="small"
+                      color={getColorChipColor(filament.color)}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>{filament.amount.toLocaleString()}</TableCell>
+                  <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>
+                    {filament.cost.toFixed(2)} {filament.currency}
+                  </TableCell>
+                  <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Reduce Amount">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleReduceAmount(filament)}
+                          color="warning"
+                        >
+                          <RemoveIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteClick(filament)}
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Mobile/Tablet Card Layout */}
+      {(isMobile || isTablet) && (
+        <Grid container spacing={2}>
+          {filteredAndSortedFilaments.map((filament) => (
+            <Grid item xs={12} sm={6} key={filament.id}>
+              <FilamentCard
+                filament={filament}
+                onDelete={handleDeleteClick}
+                onReduce={handleReduceAmount}
+                getColorChipColor={getColorChipColor}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {filteredAndSortedFilaments.length === 0 && (
         <Alert severity="info" sx={{ mt: 2 }}>

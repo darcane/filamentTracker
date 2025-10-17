@@ -7,6 +7,13 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Filament } from './types/filament';
 import { filamentApi } from './services/api';
 import FilamentForm from './components/FilamentForm';
@@ -14,8 +21,8 @@ import FilamentTable from './components/FilamentTable';
 import NotesSection from './components/NotesSection';
 import ThemeToggle from './components/ThemeToggle';
 import AppLogo from './components/AppLogo';
-import { CustomThemeProvider } from './contexts/ThemeContext';
 import { Alert, Snackbar } from '@mui/material';
+import { useResponsive } from './hooks/useMediaQuery';
 
 function App() {
   const [filaments, setFilaments] = useState<Filament[]>([]);
@@ -23,6 +30,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isMobile, isTablet, isDesktop } = useResponsive();
 
   // Load filaments on component mount
   useEffect(() => {
@@ -75,8 +84,21 @@ function App() {
     setError(null);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
+  const handleDrawerTabChange = (newValue: number) => {
+    setActiveTab(newValue);
+    setDrawerOpen(false);
   };
 
   const getPageContent = () => {
@@ -106,30 +128,102 @@ function App() {
       <CssBaseline />
       <AppBar position="static" elevation={1}>
         <Container maxWidth="lg">
-          <Toolbar sx={{ px: 0 }}>
-            <AppLogo size="medium" variant="horizontal" />
-            <Box sx={{ flexGrow: 1 }} />
-            <ThemeToggle />
+          <Toolbar sx={{ px: { xs: 1, sm: 2, md: 0 } }}>
+            {isMobile || isTablet ? (
+              <>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{ mr: 2 }}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <AppLogo size="xsmall" variant="horizontal" />
+              </>
+            ) : (
+              <>
+                <AppLogo size="medium" variant="horizontal" />
+                <Box sx={{ flexGrow: 1 }} />
+                <ThemeToggle />
+              </>
+            )}
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* Mobile/Tablet Drawer */}
+      {(isMobile || isTablet) && (
+        <Drawer
+          variant="temporary"
+          anchor="left"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 280 },
+          }}
+        >
+          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AppLogo size="small" variant="horizontal" />
+          </Box>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton 
+                selected={activeTab === 0}
+                onClick={() => handleDrawerTabChange(0)}
+              >
+                <ListItemText primary="Filament Inventory" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton 
+                selected={activeTab === 1}
+                onClick={() => handleDrawerTabChange(1)}
+              >
+                <ListItemText primary="Notes & Helpers" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ p: 2 }}>
+            <ThemeToggle />
+          </Box>
+        </Drawer>
+      )}
       
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4, userSelect: 'none' }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ userSelect: 'none', cursor: 'default' }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+        <Box sx={{ mb: { xs: 2, sm: 3, md: 4 }, userSelect: 'none' }}>
+          <Typography 
+            variant={isMobile ? 'h5' : 'h4'} 
+            component="h1" 
+            gutterBottom 
+            sx={{ userSelect: 'none', cursor: 'default' }}
+          >
             {title}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary" sx={{ userSelect: 'none', cursor: 'default' }}>
+          <Typography 
+            variant={isMobile ? 'body2' : 'subtitle1'} 
+            color="text.secondary" 
+            sx={{ userSelect: 'none', cursor: 'default' }}
+          >
             {description}
           </Typography>
         </Box>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={activeTab} onChange={handleTabChange} aria-label="main navigation tabs">
-            <Tab label="Filament Inventory" />
-            <Tab label="Notes & Helpers" />
-          </Tabs>
-        </Box>
+        {/* Desktop Tabs - Hidden on mobile/tablet */}
+        {isDesktop && (
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Tabs value={activeTab} onChange={handleTabChange} aria-label="main navigation tabs">
+              <Tab label="Filament Inventory" />
+              <Tab label="Notes & Helpers" />
+            </Tabs>
+          </Box>
+        )}
 
         {activeTab === 0 && (
           <>
@@ -159,7 +253,10 @@ function App() {
           open={!!successMessage}
           autoHideDuration={4000}
           onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ 
+            vertical: isMobile ? 'top' : 'bottom', 
+            horizontal: 'center' 
+          }}
         >
           <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
             {successMessage}
@@ -170,7 +267,10 @@ function App() {
           open={!!error}
           autoHideDuration={6000}
           onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ 
+            vertical: isMobile ? 'top' : 'bottom', 
+            horizontal: 'center' 
+          }}
         >
           <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
             {error}

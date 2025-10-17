@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Filament, CreateFilamentRequest, UpdateFilamentRequest, ReduceAmountRequest } from '../types/filament';
+import { Filament, CreateFilamentRequest, UpdateFilamentRequest } from '../types/filament';
 
 const API_BASE_URL = '/api';
 
