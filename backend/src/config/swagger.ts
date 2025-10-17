@@ -4,14 +4,14 @@ import { Options } from 'swagger-jsdoc';
 const options: Options = {
   definition: {
     openapi: '3.0.0',
-    info: {
-      title: 'FilamentFlow API',
-      version: '1.0.0',
-      description: 'A RESTful API for managing 3D printer filament inventory with Home Assistant integration',
-      contact: {
-        name: 'FilamentFlow API',
-        email: 'support@filamentflow.com',
-      },
+        info: {
+          title: 'Filamentory API',
+          version: '1.0.0',
+          description: 'A RESTful API for managing 3D printer filament inventory with Home Assistant integration',
+          contact: {
+            name: 'Filamentory API',
+            email: 'support@filamentory.com',
+          },
       license: {
         name: 'MIT',
         url: 'https://opensource.org/licenses/MIT',

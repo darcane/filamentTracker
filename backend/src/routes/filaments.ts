@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { storageService } from '../services/storage';
+import { databaseService } from '../services/database';
+import { authenticateToken } from '../middleware/auth';
 import { CreateFilamentRequest, UpdateFilamentRequest, ReduceAmountRequest } from '../types/filament';
 
 const router = Router();
@@ -47,9 +49,9 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const filaments = await storageService.getAllFilaments();
+    const filaments = await databaseService.getAllFilaments(req.user!.id);
     res.json(filaments);
   } catch (error) {
     console.error('Error fetching filaments:', error);
@@ -85,10 +87,10 @@ router.get('/', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const filament = await storageService.getFilamentById(id);
+    const filament = await databaseService.getFilamentById(id, req.user!.id);
     
     if (!filament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -134,7 +136,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const filamentData: CreateFilamentRequest = req.body;
     
@@ -155,7 +157,10 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Currency must be SEK, EUR, or USD' });
     }
 
-    const newFilament = await storageService.createFilament(filamentData);
+    const newFilament = await databaseService.createFilament({
+      ...filamentData,
+      userId: req.user!.id,
+    });
     res.status(201).json(newFilament);
   } catch (error) {
     console.error('Error creating filament:', error);
@@ -203,7 +208,7 @@ router.post('/', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates: UpdateFilamentRequest = req.body;
@@ -223,7 +228,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Currency must be SEK, EUR, or USD' });
     }
 
-    const updatedFilament = await storageService.updateFilament(id, updates);
+    const updatedFilament = await databaseService.updateFilament(id, req.user!.id, updates);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -260,10 +265,10 @@ router.put('/:id', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await storageService.deleteFilament(id);
+    const deleted = await databaseService.deleteFilament(id, req.user!.id);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -314,7 +319,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.patch('/:id/reduce', async (req: Request, res: Response) => {
+router.patch('/:id/reduce', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { amount }: ReduceAmountRequest = req.body;
@@ -323,7 +328,7 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Amount must be a positive number' });
     }
 
-    const updatedFilament = await storageService.reduceFilamentAmount(id, amount);
+    const updatedFilament = await databaseService.reduceFilamentAmount(id, req.user!.id, amount);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -357,9 +362,9 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/total', async (req: Request, res: Response) => {
+router.get('/stats/total', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const total = await storageService.getTotalFilaments();
+    const total = await databaseService.getTotalFilaments(req.user!.id);
     res.json({ total });
   } catch (error) {
     console.error('Error fetching total count:', error);
@@ -393,9 +398,9 @@ router.get('/stats/total', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/value', async (req: Request, res: Response) => {
+router.get('/stats/value', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const value = await storageService.getTotalValue();
+    const value = await databaseService.getTotalValue(req.user!.id);
     res.json(value);
   } catch (error) {
     console.error('Error fetching total value:', error);
@@ -429,9 +434,9 @@ router.get('/stats/value', async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/brands', async (req: Request, res: Response) => {
+router.get('/stats/brands', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const brands = await storageService.getBrandStats();
+    const brands = await databaseService.getBrandStats(req.user!.id);
     res.json(brands);
   } catch (error) {
     console.error('Error fetching brand stats:', error);

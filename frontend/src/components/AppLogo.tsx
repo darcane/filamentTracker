@@ -7,10 +7,10 @@ interface AppLogoProps {
   variant?: 'horizontal' | 'vertical' | 'icon-only';
 }
 
-const AppLogo: React.FC<AppLogoProps> = ({ 
-  size = 'medium', 
-  showText = true, 
-  variant = 'horizontal' 
+const AppLogo: React.FC<AppLogoProps> = ({
+  size = 'medium',
+  showText = true,
+  variant = 'horizontal'
 }) => {
   const getSizeConfig = () => {
     switch (size) {
@@ -40,68 +40,95 @@ const AppLogo: React.FC<AppLogoProps> = ({
         cursor: 'default',
       }}
     >
-      {/* Background circle */}
+      {/* Main container with inventory box concept */}
       <Box
         sx={{
           width: iconSize,
           height: iconSize,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)',
-          border: '2px solid #1976d2',
+          borderRadius: '12%',
+          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+          border: '2px solid #1565c0',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           userSelect: 'none',
           cursor: 'default',
+          boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
         }}
       >
-        {/* Filament spool representation */}
+        {/* Filament spool inside inventory box */}
         <Box
           sx={{
-            width: iconSize * 0.6,
-            height: iconSize * 0.6,
+            width: iconSize * 0.5,
+            height: iconSize * 0.5,
             borderRadius: '50%',
-            border: `2px solid rgba(255, 255, 255, 0.8)`,
+            border: `2px solid rgba(255, 255, 255, 0.9)`,
             position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
+          {/* Inner spool details */}
           <Box
             sx={{
-              width: iconSize * 0.4,
-              height: iconSize * 0.4,
+              width: iconSize * 0.3,
+              height: iconSize * 0.3,
               borderRadius: '50%',
-              border: `1.5px solid rgba(255, 255, 255, 0.6)`,
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              border: `1.5px solid rgba(255, 255, 255, 0.7)`,
+              position: 'relative',
             }}
-          />
-          <Box
-            sx={{
-              width: iconSize * 0.2,
-              height: iconSize * 0.2,
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
+          >
+            <Box
+              sx={{
+                width: iconSize * 0.15,
+                height: iconSize * 0.15,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+          </Box>
         </Box>
-        
+
+        {/* Inventory label/barcode effect */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 2,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: iconSize * 0.6,
+            height: 2,
+            background: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: 1,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -1,
+              left: '20%',
+              width: '60%',
+              height: 1,
+              background: 'rgba(255, 255, 255, 0.6)',
+              borderRadius: 1,
+            },
+          }}
+        />
+
         {/* Filament strand flowing out */}
         <Box
           sx={{
             position: 'absolute',
-            right: -iconSize * 0.3,
+            right: -iconSize * 0.25,
             top: '50%',
             transform: 'translateY(-50%)',
-            width: iconSize * 0.4,
+            width: iconSize * 0.3,
             height: 2,
-            background: 'linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%)',
+            background: 'linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 100%)',
             borderRadius: 1,
             '&::before': {
               content: '""',
@@ -141,7 +168,7 @@ const AppLogo: React.FC<AppLogoProps> = ({
             cursor: 'default',
           }}
         >
-          FilamentFlow
+          Filamentory
         </Typography>
       </Box>
     );
@@ -163,7 +190,7 @@ const AppLogo: React.FC<AppLogoProps> = ({
           cursor: 'default',
         }}
       >
-        FilamentFlow
+        Filamentory
       </Typography>
     </Box>
   );
