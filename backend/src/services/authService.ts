@@ -23,6 +23,9 @@ export class AuthService {
       user = await databaseService.createUser(normalizedEmail);
     }
 
+    // Invalidate any existing magic tokens for this user
+    await databaseService.invalidateUserMagicTokens(user.id);
+
     // Generate magic token
     const magicToken = tokenService.generateMagicToken();
     const expiresAt = tokenService.getTokenExpiry(15); // 15 minutes
@@ -34,11 +37,13 @@ export class AuthService {
     const magicLink = `${EMAIL_CONFIG.appUrl}/auth/verify?token=${magicToken}`;
 
     // Send magic link email
-    await emailService.sendMagicLink(normalizedEmail, magicLink, magicToken.split('-')[0]);
+    const code = magicToken.split('-')[0];
+    await emailService.sendMagicLink(normalizedEmail, magicLink, code);
 
     return {
       message: 'Magic link sent to your email',
       email: normalizedEmail,
+      code: code, // Return the 6-digit code for manual entry
     };
   }
 
@@ -71,6 +76,50 @@ export class AuthService {
     // Generate tokens
     const accessToken = tokenService.generateAccessToken(user.id, user.email);
     const refreshToken = tokenService.generateRefreshToken(user.id, 'session-id'); // We'll use session management later
+
+    // Create session
+    const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
+    await databaseService.createSession(user.id, refreshToken, sessionExpiry);
+
+    // Send welcome email for new users (optional)
+    if (user.email_verified === 0) {
+      emailService.sendWelcomeEmail(user.email);
+    }
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async verifyCode(email: string, code: string): Promise<AuthResponse> {
+    // Find the user
+    const user = await databaseService.getUserByEmail(email.toLowerCase().trim());
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Find a valid magic token for this user that starts with the code
+    const magicTokenRecord = await databaseService.getMagicTokenByUserAndCode(user.id, code);
+    if (!magicTokenRecord) {
+      throw new Error('Invalid or expired code');
+    }
+
+    // Check if token is expired
+    if (tokenService.isTokenExpired(magicTokenRecord.expires_at)) {
+      throw new Error('Code has expired');
+    }
+
+    // Mark token as used
+    await databaseService.markMagicTokenAsUsed(magicTokenRecord.id);
+
+    // Update last login
+    await databaseService.updateUserLastLogin(user.id);
+
+    // Generate tokens
+    const accessToken = tokenService.generateAccessToken(user.id, user.email);
+    const refreshToken = tokenService.generateRefreshToken(user.id, 'session-id');
 
     // Create session
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days

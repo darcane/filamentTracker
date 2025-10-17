@@ -404,10 +404,30 @@ class DatabaseService {
     });
   }
 
+  getMagicTokenByUserAndCode(userId: string, code: string): Promise<{ id: string; user_id: string; token: string; expires_at: string; used: number; created_at: string } | null> {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare('SELECT * FROM magic_tokens WHERE user_id = ? AND token LIKE ? AND used = 0 ORDER BY created_at DESC LIMIT 1');
+      stmt.get(userId, `${code}-%`, (err, row: any) => {
+        if (err) reject(err);
+        else resolve(row || null);
+      });
+    });
+  }
+
   markMagicTokenAsUsed(tokenId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('UPDATE magic_tokens SET used = 1 WHERE id = ?');
       stmt.run(tokenId, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  invalidateUserMagicTokens(userId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare('UPDATE magic_tokens SET used = 1 WHERE user_id = ? AND used = 0');
+      stmt.run(userId, (err) => {
         if (err) reject(err);
         else resolve();
       });

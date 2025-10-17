@@ -10,12 +10,14 @@ import {
 } from '@mui/material';
 import { Email as EmailIcon } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
+import CodeEntryForm from './CodeEntryForm';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showCodeEntry, setShowCodeEntry] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +47,23 @@ const LoginForm: React.FC = () => {
     }
   };
 
+  if (showCodeEntry) {
+    return (
+      <CodeEntryForm
+        email={email}
+        onSuccess={() => {
+          setShowCodeEntry(false);
+          setSuccess(false);
+          setEmail('');
+        }}
+        onBack={() => {
+          setShowCodeEntry(false);
+          setSuccess(false);
+        }}
+      />
+    );
+  }
+
   if (success) {
     return (
       <Paper sx={{ p: 4, maxWidth: 400, mx: 'auto', mt: 4 }}>
@@ -57,18 +76,27 @@ const LoginForm: React.FC = () => {
             We've sent a magic link to <strong>{email}</strong>
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Click the link in your email to sign in. The link will expire in 15 minutes.
+            Click the link in your email to sign in, or enter the 6-digit code manually.
           </Typography>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setSuccess(false);
-              setEmail('');
-            }}
-            fullWidth
-          >
-            Try Different Email
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+            <Button
+              variant="contained"
+              onClick={() => setShowCodeEntry(true)}
+              fullWidth
+            >
+              Enter Code Manually
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setSuccess(false);
+                setEmail('');
+              }}
+              fullWidth
+            >
+              Try Different Email
+            </Button>
+          </Box>
         </Box>
       </Paper>
     );

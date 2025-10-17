@@ -132,6 +132,90 @@ router.get('/verify', verifyRateLimit, async (req, res) => {
 
 /**
  * @swagger
+ * /api/auth/verify-code:
+ *   post:
+ *     summary: Verify 6-digit code
+ *     description: Verify the 6-digit code sent via email and return authentication tokens
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               code:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Code verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 message:
+ *                   type: string
+ *                   example: "Login successful"
+ *       400:
+ *         description: Invalid or expired code
+ *       429:
+ *         description: Too many requests
+ */
+router.post('/verify-code', verifyRateLimit, async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+      return res.status(400).json({ error: 'Code must be a 6-digit number' });
+    }
+
+    const authResponse = await authService.verifyCode(email, code);
+
+    // Set httpOnly cookies
+    res.cookie('access_token', authResponse.accessToken, {
+      httpOnly: true,
+      secure: COOKIE_CONFIG.secure,
+      sameSite: COOKIE_CONFIG.sameSite,
+      maxAge: COOKIE_CONFIG.accessTokenMaxAge,
+      domain: COOKIE_CONFIG.domain,
+    });
+
+    res.cookie('refresh_token', authResponse.refreshToken, {
+      httpOnly: true,
+      secure: COOKIE_CONFIG.secure,
+      sameSite: COOKIE_CONFIG.sameSite,
+      maxAge: COOKIE_CONFIG.refreshTokenMaxAge,
+      domain: COOKIE_CONFIG.domain,
+      path: '/api/auth/refresh',
+    });
+
+    res.json({
+      user: authResponse.user,
+      message: 'Login successful',
+    });
+  } catch (error) {
+    console.error('Code verification error:', error);
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Code verification failed' });
+  }
+});
+
+/**
+ * @swagger
  * /api/auth/refresh:
  *   post:
  *     summary: Refresh access token

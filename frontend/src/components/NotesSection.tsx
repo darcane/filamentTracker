@@ -47,10 +47,6 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
   });
   const { isMobile } = useResponsive();
 
-  useEffect(() => {
-    loadNotes();
-  }, []);
-
   const loadNotes = async () => {
     try {
       setLoading(true);
@@ -66,6 +62,10 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadNotes();
+  }, []);
 
   const saveNotes = (newNotes: Note[]) => {
     localStorage.setItem('filament-notes', JSON.stringify(newNotes));

@@ -24,6 +24,12 @@ export const authApi = {
     return response.data;
   },
 
+  // Verify 6-digit code
+  verifyCode: async (email: string, code: string): Promise<AuthResponse> => {
+    const response = await api.post('/auth/verify-code', { email, code });
+    return response.data;
+  },
+
   // Refresh access token
   refreshToken: async (): Promise<{ message: string }> => {
     const response = await api.post('/auth/refresh');

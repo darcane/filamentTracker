@@ -47,11 +47,6 @@ const MainAppContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load filaments on component mount
-  useEffect(() => {
-    loadFilaments();
-  }, []);
-
   const loadFilaments = async () => {
     try {
       setLoading(true);
@@ -64,6 +59,11 @@ const MainAppContent: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Load filaments on component mount
+  useEffect(() => {
+    loadFilaments();
+  }, []);
 
   const handleFilamentAdded = (filament: Filament) => {
     setFilaments(prev => [filament, ...prev]);

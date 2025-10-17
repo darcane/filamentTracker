@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Paper,
@@ -20,19 +20,7 @@ const VerifyToken: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const { checkAuthStatus } = useAuth();
 
-  useEffect(() => {
-    const token = searchParams.get('token');
-    
-    if (!token) {
-      setError('No verification token provided');
-      setLoading(false);
-      return;
-    }
-
-    verifyToken(token);
-  }, [searchParams]);
-
-  const verifyToken = async (token: string) => {
+  const verifyToken = useCallback(async (token: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -53,7 +41,19 @@ const VerifyToken: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkAuthStatus, navigate]);
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    
+    if (!token) {
+      setError('No verification token provided');
+      setLoading(false);
+      return;
+    }
+
+    verifyToken(token);
+  }, [searchParams, verifyToken]);
 
   const handleRetry = () => {
     navigate('/login');
