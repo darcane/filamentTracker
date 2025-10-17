@@ -8,9 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
-    "migrate": "tsx src/scripts/migrate-to-sqlite.ts",
-    "migrate-data": "tsx src/scripts/migrate-data.ts"
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

@@ -67,30 +67,6 @@ The frontend will run on `http://localhost:3000`
 3. **Configure Email**: Add your API key to the `.env` file
 4. **Test Email**: Use Resend's test domain for development
 
-## Database Migration
-
-If you have existing JSON data, run the migration script:
-
-```bash
-cd backend
-npm run migrate-data migrate
-```
-
-**Migration Features:**
-- ✅ **Automatic User Creation**: Creates default user for legacy data
-- ✅ **Data Preservation**: Migrates all filaments and notes
-- ✅ **Backup Creation**: Automatically backs up original JSON files
-- ✅ **Validation**: Built-in validation to ensure migration success
-- ✅ **Error Handling**: Graceful handling of duplicate or invalid data
-
-**Migration Commands:**
-```bash
-# Migrate data from JSON files
-npm run migrate-data migrate
-
-# Validate migration results
-npm run migrate-data validate
-```
 
 ## Troubleshooting
 

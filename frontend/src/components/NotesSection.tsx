@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { Note, CreateNoteRequest, NOTE_CATEGORIES } from '../types/note';
 import { useResponsive } from '../hooks/useMediaQuery';
+import { notesApi } from '../services/notesApi';
 
 interface NotesSectionProps {
   onError: (error: string) => void;
@@ -50,11 +51,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
   const loadNotes = async () => {
     try {
       setLoading(true);
-      // For now, we'll use localStorage since we don't have API endpoints yet
-      const savedNotes = localStorage.getItem('filament-notes');
-      if (savedNotes) {
-        setNotes(JSON.parse(savedNotes));
-      }
+      const data = await notesApi.getAll();
+      setNotes(data);
     } catch (error) {
       onError('Failed to load notes');
       console.error('Error loading notes:', error);
@@ -67,8 +65,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
     loadNotes();
   }, []);
 
-  const saveNotes = (newNotes: Note[]) => {
-    localStorage.setItem('filament-notes', JSON.stringify(newNotes));
+  const saveNotes = async (newNotes: Note[]) => {
+    // Notes are now managed by the API, so we just update the local state
     setNotes(newNotes);
   };
 
@@ -101,40 +99,39 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title.trim() || !formData.content.trim()) {
       onError('Please fill in both title and content');
       return;
     }
 
-    const now = new Date().toISOString();
-    
-    if (editingNote) {
-      // Update existing note
-      const updatedNote: Note = {
-        ...editingNote,
-        ...formData,
-        updatedAt: now,
-      };
-      const updatedNotes = notes.map(n => n.id === editingNote.id ? updatedNote : n);
-      saveNotes(updatedNotes);
-    } else {
-      // Create new note
-      const newNote: Note = {
-        id: Date.now().toString(), // Simple ID generation for now
-        ...formData,
-        createdAt: now,
-        updatedAt: now,
-      };
-      saveNotes([...notes, newNote]);
+    try {
+      if (editingNote) {
+        // Update existing note
+        await notesApi.update(editingNote.id, formData);
+      } else {
+        // Create new note
+        await notesApi.create(formData);
+      }
+      
+      // Reload notes from API
+      await loadNotes();
+      handleCloseDialog();
+    } catch (error) {
+      onError('Failed to save note');
+      console.error('Error saving note:', error);
     }
-
-    handleCloseDialog();
   };
 
-  const handleDelete = (id: string) => {
-    const updatedNotes = notes.filter(n => n.id !== id);
-    saveNotes(updatedNotes);
+  const handleDelete = async (id: string) => {
+    try {
+      await notesApi.delete(id);
+      // Reload notes from API
+      await loadNotes();
+    } catch (error) {
+      onError('Failed to delete note');
+      console.error('Error deleting note:', error);
+    }
   };
 
   const getCategoryColor = (category: string) => {

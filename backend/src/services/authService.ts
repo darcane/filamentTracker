@@ -17,34 +17,37 @@ export class AuthService {
     // Normalize email
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check if user exists, create if not
-    let user = await databaseService.getUserByEmail(normalizedEmail);
-    if (!user) {
-      user = await databaseService.createUser(normalizedEmail);
-    }
+        // Check if user exists, create if not
+        let user = await databaseService.getUserByEmail(normalizedEmail);
+        if (!user) {
+          user = await databaseService.createUser(normalizedEmail);
+        }
 
-    // Invalidate any existing magic tokens for this user
-    await databaseService.invalidateUserMagicTokens(user.id);
+        if (!user) {
+          throw new Error('Failed to create user');
+        }
 
-    // Generate magic token
-    const magicToken = tokenService.generateMagicToken();
-    const expiresAt = tokenService.getTokenExpiry(15); // 15 minutes
+        // Invalidate any existing magic tokens for this user
+        await databaseService.invalidateUserMagicTokens(user.id);
 
-    // Store magic token in database
-    await databaseService.createMagicToken(user.id, magicToken, expiresAt);
+        // Generate magic token
+        const magicToken = tokenService.generateMagicToken();
+        const expiresAt = tokenService.getTokenExpiry(15); // 15 minutes
 
-    // Generate magic link
-    const magicLink = `${EMAIL_CONFIG.appUrl}/auth/verify?token=${magicToken}`;
+        // Store magic token in database
+        await databaseService.createMagicToken(user.id, magicToken, expiresAt);
 
-    // Send magic link email
-    const code = magicToken.split('-')[0];
-    await emailService.sendMagicLink(normalizedEmail, magicLink, code);
+        // Generate magic link
+        const magicLink = `${EMAIL_CONFIG.appUrl}/auth/verify?token=${magicToken}`;
 
-    return {
-      message: 'Magic link sent to your email',
-      email: normalizedEmail,
-      code: code, // Return the 6-digit code for manual entry
-    };
+        // Send magic link email
+        const code = magicToken.split('-')[0];
+        await emailService.sendMagicLink(normalizedEmail, magicLink, code);
+
+        return {
+          message: 'Magic link sent to your email',
+          email: normalizedEmail,
+        };
   }
 
   async verifyToken(verifyData: VerifyTokenRequest): Promise<AuthResponse> {

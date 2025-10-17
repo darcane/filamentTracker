@@ -43,7 +43,6 @@ npm run build        # Build TypeScript to JavaScript
 npm run start        # Start production server
 npm run lint         # Run ESLint
 npm run lint:fix     # Fix ESLint errors
-npm run migrate-data # Run data migration script
 ```
 
 ## Environment Variables

@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import { storageService } from '../services/storage';
 import { databaseService } from '../services/database';
 import { authenticateToken } from '../middleware/auth';
 import { CreateFilamentRequest, UpdateFilamentRequest, ReduceAmountRequest } from '../types/filament';

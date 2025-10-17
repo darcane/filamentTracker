@@ -168,23 +168,13 @@ All user-specific data is filtered by `user_id`:
 - `expires_at`: Required, future timestamp
 - `used`: Must be 0 or 1
 
-## Migration
-
-### From JSON to SQLite
-The migration script handles:
-- Creating default user for legacy data
-- Migrating filaments with user_id assignment
-- Migrating notes with user_id assignment
-- Creating backups of original JSON files
-- Validation of migrated data
-
-### Schema Updates
+## Schema Updates
 When adding new fields:
 1. Add column to database schema
 2. Update TypeScript interfaces
 3. Update API endpoints
 4. Update frontend components
-5. Create migration script if needed
+5. Update database schema if needed
 
 ## Performance Considerations
 

@@ -75,7 +75,7 @@ class DatabaseService {
       )
     `);
 
-    // Create notes table (migrate from localStorage)
+        // Create notes table
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS notes (
         id TEXT PRIMARY KEY,
@@ -175,7 +175,7 @@ class DatabaseService {
   getFilamentById(id: string, userId: string): Promise<Filament | null> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('SELECT * FROM filaments WHERE id = ? AND user_id = ?');
-      stmt.get(id, userId, (err, row) => {
+      stmt.get(id, userId, (err: any, row: any) => {
         if (err) reject(err);
         else resolve((row as Filament) || null);
       });
@@ -194,7 +194,7 @@ class DatabaseService {
 
       stmt.run(
         id,
-        filamentData.userId,
+            filamentData.userId,
         filamentData.brand,
         filamentData.filamentType,
         filamentData.typeModifier || null,
@@ -204,10 +204,13 @@ class DatabaseService {
         filamentData.currency,
         now,
         now,
-        (err) => {
+            (err: any) => {
           if (err) reject(err);
           else {
-            this.getFilamentById(id, filamentData.userId).then(resolve).catch(reject);
+                this.getFilamentById(id, filamentData.userId).then((result) => {
+                  if (result) resolve(result);
+                  else reject(new Error('Failed to retrieve created filament'));
+                }).catch(reject);
           }
         }
       );
@@ -241,11 +244,11 @@ class DatabaseService {
           updatedFilament.currency,
           updatedFilament.updatedAt,
           id,
-          userId,
-          (err) => {
+              userId,
+              (err: any) => {
             if (err) reject(err);
             else {
-              this.getFilamentById(id, userId).then(resolve).catch(reject);
+                  this.getFilamentById(id, userId).then(resolve).catch(reject);
             }
           }
         );
@@ -256,7 +259,7 @@ class DatabaseService {
   deleteFilament(id: string, userId: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('DELETE FROM filaments WHERE id = ? AND user_id = ?');
-      stmt.run(id, userId, function(err) {
+      stmt.run(id, userId, function(this: any, err: any) {
         if (err) reject(err);
         else resolve(this.changes > 0);
       });
@@ -320,7 +323,7 @@ class DatabaseService {
   }
 
   // User management
-  createUser(email: string): Promise<{ id: string; email: string; email_verified: number; created_at: string; updated_at: string }> {
+  createUser(email: string): Promise<{ id: string; email: string; email_verified: number; last_login: string | null; created_at: string; updated_at: string }> {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
       const id = require('uuid').v4();
@@ -330,13 +333,14 @@ class DatabaseService {
         VALUES (?, ?, 0, ?, ?)
       `);
 
-      stmt.run(id, email, now, now, function(err) {
+      stmt.run(id, email, now, now, function(err: any) {
         if (err) reject(err);
         else {
           resolve({
             id,
             email,
             email_verified: 0,
+            last_login: null,
             created_at: now,
             updated_at: now
           });
@@ -369,7 +373,7 @@ class DatabaseService {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
       const stmt = this.db.prepare('UPDATE users SET last_login = ?, updated_at = ? WHERE id = ?');
-      stmt.run(now, now, userId, (err) => {
+      stmt.run(now, now, userId, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
@@ -387,7 +391,7 @@ class DatabaseService {
         VALUES (?, ?, ?, ?, 0, ?)
       `);
 
-      stmt.run(id, userId, token, expiresAt, now, (err) => {
+      stmt.run(id, userId, token, expiresAt, now, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
@@ -407,7 +411,7 @@ class DatabaseService {
   getMagicTokenByUserAndCode(userId: string, code: string): Promise<{ id: string; user_id: string; token: string; expires_at: string; used: number; created_at: string } | null> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('SELECT * FROM magic_tokens WHERE user_id = ? AND token LIKE ? AND used = 0 ORDER BY created_at DESC LIMIT 1');
-      stmt.get(userId, `${code}-%`, (err, row: any) => {
+      stmt.get(userId, `${code}-%`, (err: any, row: any) => {
         if (err) reject(err);
         else resolve(row || null);
       });
@@ -445,7 +449,7 @@ class DatabaseService {
         VALUES (?, ?, ?, ?, ?, ?)
       `);
 
-      stmt.run(id, userId, refreshToken, expiresAt, now, now, (err) => {
+      stmt.run(id, userId, refreshToken, expiresAt, now, now, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
@@ -466,7 +470,7 @@ class DatabaseService {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
       const stmt = this.db.prepare('UPDATE sessions SET last_used = ? WHERE id = ?');
-      stmt.run(now, sessionId, (err) => {
+      stmt.run(now, sessionId, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
@@ -504,7 +508,7 @@ class DatabaseService {
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
 
-      stmt.run(id, userId, title, content, category, now, now, function(err) {
+      stmt.run(id, userId, title, content, category, now, now, function(err: any) {
         if (err) reject(err);
         else {
           resolve({
@@ -531,14 +535,14 @@ class DatabaseService {
         WHERE id = ? AND user_id = ?
       `);
 
-      stmt.run(title, content, category, now, noteId, userId, function(err) {
+      stmt.run(title, content, category, now, noteId, userId, function(this: any, err: any) {
         if (err) reject(err);
         else if (this.changes === 0) {
           resolve(null);
         } else {
           // Get updated note
           const getStmt = this.db.prepare('SELECT * FROM notes WHERE id = ? AND user_id = ?');
-          getStmt.get(noteId, userId, (err, row: any) => {
+          getStmt.get(noteId, userId, (err: any, row: any) => {
             if (err) reject(err);
             else resolve(row);
           });
@@ -550,51 +554,10 @@ class DatabaseService {
   deleteNote(noteId: string, userId: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('DELETE FROM notes WHERE id = ? AND user_id = ?');
-      stmt.run(noteId, userId, function(err) {
+      stmt.run(noteId, userId, function(this: any, err: any) {
         if (err) reject(err);
         else resolve(this.changes > 0);
       });
-    });
-  }
-
-  // Migration helper - import from JSON
-  importFromJSON(filaments: Filament[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const insertStmt = this.db.prepare(`
-        INSERT OR REPLACE INTO filaments (id, brand, filamentType, typeModifier, color, amount, cost, currency, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      let completed = 0;
-      let hasError = false;
-
-      for (const filament of filaments) {
-        insertStmt.run(
-          filament.id,
-          filament.brand,
-          filament.filamentType,
-          filament.typeModifier || null,
-          filament.color,
-          filament.amount,
-          filament.cost,
-          filament.currency,
-          filament.createdAt,
-          filament.updatedAt,
-          (err) => {
-            if (err && !hasError) {
-              hasError = true;
-              reject(err);
-              return;
-            }
-            
-            completed++;
-            if (completed === filaments.length && !hasError) {
-              console.log(`✅ Imported ${filaments.length} filaments from JSON`);
-              resolve();
-            }
-          }
-        );
-      }
     });
   }
 
