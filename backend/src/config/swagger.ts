@@ -5,12 +5,12 @@ const options: Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: '3D Printer Filament Tracker API',
+      title: 'FilamentFlow API',
       version: '1.0.0',
       description: 'A RESTful API for managing 3D printer filament inventory with Home Assistant integration',
       contact: {
-        name: 'Filament Tracker API',
-        email: 'support@filamenttracker.com',
+        name: 'FilamentFlow API',
+        email: 'support@filamentflow.com',
       },
       license: {
         name: 'MIT',

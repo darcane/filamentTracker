@@ -1,4 +1,4 @@
-# 3D Printer Filament Tracker
+# FilamentFlow
 
 A full-stack TypeScript application for tracking 3D printer filament inventory with a modern React frontend and Node.js backend.
 
@@ -24,7 +24,7 @@ A full-stack TypeScript application for tracking 3D printer filament inventory w
 ## Project Structure
 
 ```
-FilamentTracker/
+FilamentFlow/
 ├── frontend/                 # React frontend application
 │   ├── src/
 │   │   ├── components/       # React components

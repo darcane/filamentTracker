@@ -13,6 +13,7 @@ import FilamentForm from './components/FilamentForm';
 import FilamentTable from './components/FilamentTable';
 import NotesSection from './components/NotesSection';
 import ThemeToggle from './components/ThemeToggle';
+import AppLogo from './components/AppLogo';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 import { Alert, Snackbar } from '@mui/material';
 
@@ -78,27 +79,48 @@ function App() {
     setActiveTab(newValue);
   };
 
+  const getPageContent = () => {
+    switch (activeTab) {
+      case 0:
+        return {
+          title: 'Filament Inventory',
+          description: 'Manage your filament inventory and keep track of important notes'
+        };
+      case 1:
+        return {
+          title: 'Notes & Helpers',
+          description: 'Add notes, tips, and helpful information for your 3D printing projects'
+        };
+      default:
+        return {
+          title: 'FilamentFlow',
+          description: 'Your 3D printer filament management solution'
+        };
+    }
+  };
+
+  const { title, description } = getPageContent();
+
   return (
     <>
       <CssBaseline />
       <AppBar position="static" elevation={1}>
         <Container maxWidth="lg">
           <Toolbar sx={{ px: 0 }}>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              3D Printer Filament Tracker
-            </Typography>
+            <AppLogo size="medium" variant="horizontal" />
+            <Box sx={{ flexGrow: 1 }} />
             <ThemeToggle />
           </Toolbar>
         </Container>
       </AppBar>
       
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            3D Printer Filament Tracker
+        <Box sx={{ mb: 4, userSelect: 'none' }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ userSelect: 'none', cursor: 'default' }}>
+            {title}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Manage your filament inventory and keep track of important notes
+          <Typography variant="subtitle1" color="text.secondary" sx={{ userSelect: 'none', cursor: 'default' }}>
+            {description}
           </Typography>
         </Box>
 

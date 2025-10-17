@@ -164,7 +164,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <NotesIcon color="primary" />
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ userSelect: 'none', cursor: 'default' }}>
             Notes & Helpers
           </Typography>
         </Box>
@@ -188,7 +188,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography variant="h6" component="h3" sx={{ flexGrow: 1, mr: 1 }}>
+                    <Typography variant="h6" component="h3" sx={{ flexGrow: 1, mr: 1, userSelect: 'none', cursor: 'default' }}>
                       {note.title}
                     </Typography>
                     <Chip
@@ -208,13 +208,15 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       minHeight: '4.5em',
+                      userSelect: 'none',
+                      cursor: 'default',
                     }}
                   >
                     {note.content}
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ userSelect: 'none', cursor: 'default' }}>
                     {new Date(note.updatedAt).toLocaleDateString()}
                   </Typography>
                   <Box>
@@ -241,7 +243,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ onError }) => {
       )}
 
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ userSelect: 'none', cursor: 'default' }}>
           {editingNote ? 'Edit Note' : 'Add New Note'}
         </DialogTitle>
         <DialogContent>

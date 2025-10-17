@@ -163,7 +163,7 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom sx={{ userSelect: 'none', cursor: 'default' }}>
         Filament Inventory ({filteredAndSortedFilaments.length} items)
       </Typography>
 
@@ -230,12 +230,12 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
       </Box>
 
       {/* Table */}
-      <TableContainer>
-        <Table>
+      <TableContainer sx={{ userSelect: 'none' }}>
+        <Table sx={{ userSelect: 'none' }}>
           <TableHead>
             <TableRow>
-              <TableCell>Brand</TableCell>
-              <TableCell>
+              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Brand</TableCell>
+              <TableCell sx={{ userSelect: 'none' }}>
                 <TableSortLabel
                   active={sortField === 'filamentType'}
                   direction={sortField === 'filamentType' ? sortDirection : 'asc'}
@@ -244,8 +244,8 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
                   Type
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Modifier</TableCell>
-              <TableCell>
+              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Modifier</TableCell>
+              <TableCell sx={{ userSelect: 'none' }}>
                 <TableSortLabel
                   active={sortField === 'color'}
                   direction={sortField === 'color' ? sortDirection : 'asc'}
@@ -254,7 +254,7 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
                   Color
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sx={{ userSelect: 'none' }}>
                 <TableSortLabel
                   active={sortField === 'amount'}
                   direction={sortField === 'amount' ? sortDirection : 'asc'}
@@ -263,7 +263,7 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
                   Amount (g)
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sx={{ userSelect: 'none' }}>
                 <TableSortLabel
                   active={sortField === 'cost'}
                   direction={sortField === 'cost' ? sortDirection : 'asc'}
@@ -272,21 +272,21 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
                   Cost
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredAndSortedFilaments.map((filament) => (
               <TableRow key={filament.id} hover>
-                <TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <BrandLogo brand={filament.brand} size={24} />
                     {filament.brand}
                   </Box>
                 </TableCell>
-                <TableCell>{filament.filamentType}</TableCell>
-                <TableCell>{filament.typeModifier || 'Standard'}</TableCell>
-                <TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.filamentType}</TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>{filament.typeModifier || 'Standard'}</TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
                   <Chip
                     label={filament.color}
                     size="small"
@@ -294,11 +294,11 @@ const FilamentTable: React.FC<FilamentTableProps> = ({
                     variant="outlined"
                   />
                 </TableCell>
-                <TableCell align="right">{filament.amount.toLocaleString()}</TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>{filament.amount.toLocaleString()}</TableCell>
+                <TableCell align="right" sx={{ userSelect: 'none', cursor: 'default' }}>
                   {filament.cost.toFixed(2)} {filament.currency}
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ userSelect: 'none', cursor: 'default' }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Reduce Amount">
                       <IconButton
