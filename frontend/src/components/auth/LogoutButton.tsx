@@ -8,6 +8,7 @@ import {
   Avatar,
   Typography,
   Box,
+  useTheme,
 } from '@mui/material';
 import {
   Logout as LogoutIcon,
@@ -19,6 +20,8 @@ const LogoutButton: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [loading, setLoading] = useState(false);
   const { user, logout } = useAuth();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -59,7 +62,20 @@ const LogoutButton: React.FC = () => {
         aria-haspopup="true"
         aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
       >
-        <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+        <Avatar
+          sx={{
+            width: 32,
+            height: 32,
+            bgcolor: isDarkMode ? 'primary.main' : '#ffffff',
+            color: isDarkMode ? '#ffffff' : '#1976d2',
+            fontWeight: 'bold',
+            border: isDarkMode ? 'none' : '2px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: isDarkMode
+              ? 'none'
+              : '0 2px 8px rgba(0, 0, 0, 0.15)',
+            transition: 'all 0.3s ease-in-out',
+          }}
+        >
           {getInitials(user.email)}
         </Avatar>
       </IconButton>
