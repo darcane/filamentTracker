@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { databaseService } from '../services/database';
-import { authenticateToken } from '../middleware/auth';
 import { CreateFilamentRequest, UpdateFilamentRequest, ReduceAmountRequest } from '../types/filament';
+
+// Default user ID for non-authenticated requests (temporary solution)
+const DEFAULT_USER_ID = 'legacy-user-migration';
 
 const router = Router();
 
@@ -48,9 +50,9 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const filaments = await databaseService.getAllFilaments(req.user!.id);
+    const filaments = await databaseService.getAllFilaments(DEFAULT_USER_ID);
     res.json(filaments);
   } catch (error) {
     console.error('Error fetching filaments:', error);
@@ -86,10 +88,10 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const filament = await databaseService.getFilamentById(id, req.user!.id);
+    const filament = await databaseService.getFilamentById(id, DEFAULT_USER_ID);
     
     if (!filament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -135,7 +137,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', authenticateToken, async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const filamentData: CreateFilamentRequest = req.body;
     
@@ -158,7 +160,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 
     const newFilament = await databaseService.createFilament({
       ...filamentData,
-      userId: req.user!.id,
+      userId: DEFAULT_USER_ID,
     });
     res.status(201).json(newFilament);
   } catch (error) {
@@ -207,7 +209,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates: UpdateFilamentRequest = req.body;
@@ -227,7 +229,7 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Currency must be SEK, EUR, or USD' });
     }
 
-    const updatedFilament = await databaseService.updateFilament(id, req.user!.id, updates);
+    const updatedFilament = await databaseService.updateFilament(id, DEFAULT_USER_ID, updates);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -264,10 +266,10 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await databaseService.deleteFilament(id, req.user!.id);
+    const deleted = await databaseService.deleteFilament(id, DEFAULT_USER_ID);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -318,7 +320,7 @@ router.delete('/:id', authenticateToken, async (req: Request, res: Response) => 
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.patch('/:id/reduce', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/:id/reduce', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { amount }: ReduceAmountRequest = req.body;
@@ -327,7 +329,7 @@ router.patch('/:id/reduce', authenticateToken, async (req: Request, res: Respons
       return res.status(400).json({ error: 'Amount must be a positive number' });
     }
 
-    const updatedFilament = await databaseService.reduceFilamentAmount(id, req.user!.id, amount);
+    const updatedFilament = await databaseService.reduceFilamentAmount(id, DEFAULT_USER_ID, amount);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -361,9 +363,9 @@ router.patch('/:id/reduce', authenticateToken, async (req: Request, res: Respons
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/total', authenticateToken, async (req: Request, res: Response) => {
+router.get('/stats/total', async (req: Request, res: Response) => {
   try {
-    const total = await databaseService.getTotalFilaments(req.user!.id);
+    const total = await databaseService.getTotalFilaments(DEFAULT_USER_ID);
     res.json({ total });
   } catch (error) {
     console.error('Error fetching total count:', error);
@@ -397,9 +399,9 @@ router.get('/stats/total', authenticateToken, async (req: Request, res: Response
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/value', authenticateToken, async (req: Request, res: Response) => {
+router.get('/stats/value', async (req: Request, res: Response) => {
   try {
-    const value = await databaseService.getTotalValue(req.user!.id);
+    const value = await databaseService.getTotalValue(DEFAULT_USER_ID);
     res.json(value);
   } catch (error) {
     console.error('Error fetching total value:', error);
@@ -433,9 +435,9 @@ router.get('/stats/value', authenticateToken, async (req: Request, res: Response
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/brands', authenticateToken, async (req: Request, res: Response) => {
+router.get('/stats/brands', async (req: Request, res: Response) => {
   try {
-    const brands = await databaseService.getBrandStats(req.user!.id);
+    const brands = await databaseService.getBrandStats(DEFAULT_USER_ID);
     res.json(brands);
   } catch (error) {
     console.error('Error fetching brand stats:', error);

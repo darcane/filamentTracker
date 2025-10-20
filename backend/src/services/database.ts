@@ -110,6 +110,9 @@ class DatabaseService {
     // Migrate existing filaments table to add user_id column
     this.migrateFilamentsTable();
 
+    // Create default user for migration
+    this.createDefaultUserForMigration();
+
     // Create indexes for better performance
     this.db.exec(`
       CREATE INDEX IF NOT EXISTS idx_filaments_user_id ON filaments(user_id);
@@ -129,8 +132,36 @@ class DatabaseService {
   }
 
   private migrateFilamentsTable(): void {
-    // Since we're starting with a fresh database, no migration needed
-    console.log('✅ Database schema is up to date');
+    // Check if user_id column exists, if not add it
+    this.db.get("PRAGMA table_info(filaments)", (err, row: any) => {
+      if (err) {
+        console.error('Error checking table schema:', err);
+        return;
+      }
+      
+      // Check if user_id column exists
+      this.db.all("PRAGMA table_info(filaments)", (err, rows: any[]) => {
+        if (err) {
+          console.error('Error checking table schema:', err);
+          return;
+        }
+        
+        const hasUserIdColumn = rows.some((row: any) => row.name === 'user_id');
+        
+        if (!hasUserIdColumn) {
+          console.log('🔄 Adding user_id column to filaments table...');
+          this.db.run("ALTER TABLE filaments ADD COLUMN user_id TEXT", (err) => {
+            if (err) {
+              console.error('Error adding user_id column:', err);
+            } else {
+              console.log('✅ Added user_id column to filaments table');
+            }
+          });
+        } else {
+          console.log('✅ user_id column already exists');
+        }
+      });
+    });
   }
 
   private createDefaultUserForMigration(): void {
