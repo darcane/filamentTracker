@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+---
+# Filamentory Project Structure
+
+This workspace has two apps: a TypeScript/Express backend and a React/Vite frontend.
+
+## Backend
+- Entry point: [backend/src/server.ts](mdc:backend/src/server.ts)
+- HTTP routes:
+  - Auth: [backend/src/routes/auth.ts](mdc:backend/src/routes/auth.ts)
+  - Filaments: [backend/src/routes/filaments.ts](mdc:backend/src/routes/filaments.ts)
+  - Notes: [backend/src/routes/notes.ts](mdc:backend/src/routes/notes.ts)
+- Services:
+  - Database (SQLite): [backend/src/services/database.ts](mdc:backend/src/services/database.ts)
+  - Auth: [backend/src/services/authService.ts](mdc:backend/src/services/authService.ts)
+  - Tokens/JWT: [backend/src/services/tokenService.ts](mdc:backend/src/services/tokenService.ts)
+  - Email (Resend): [backend/src/services/emailService.ts](mdc:backend/src/services/emailService.ts)
+- Middleware:
+  - Auth: [backend/src/middleware/auth.ts](mdc:backend/src/middleware/auth.ts)
+  - Rate limiting: [backend/src/middleware/rateLimiter.ts](mdc:backend/src/middleware/rateLimiter.ts)
+- Config:
+  - Swagger/OpenAPI: [backend/src/config/swagger.ts](mdc:backend/src/config/swagger.ts)
+  - Email env: [backend/src/config/email.ts](mdc:backend/src/config/email.ts)
+  - JWT/cookies: [backend/src/config/jwt.ts](mdc:backend/src/config/jwt.ts)
+
+Notes:
+- SQLite DB file lives under `backend/data/filaments.db`.
+- JSON data migration is removed; ignore any references to `filaments.json` or `notes.json`.
+
+## Frontend
+- Vite app entry: [frontend/src/main.tsx](mdc:frontend/src/main.tsx)
+- Root app: [frontend/src/App.tsx](mdc:frontend/src/App.tsx)
+- UI components: [frontend/src/components](mdc:frontend/src/components)
+- Contexts: [frontend/src/contexts](mdc:frontend/src/contexts)
+- API clients: [frontend/src/services](mdc:frontend/src/services)
+- Types: [frontend/src/types](mdc:frontend/src/types)
+
+Auth-related frontend:
+- Context: [frontend/src/contexts/AuthContext.tsx](mdc:frontend/src/contexts/AuthContext.tsx)
+- Login & code entry: [frontend/src/components/auth/LoginForm.tsx](mdc:frontend/src/components/auth/LoginForm.tsx), [frontend/src/components/auth/CodeEntryForm.tsx](mdc:frontend/src/components/auth/CodeEntryForm.tsx)
+- Verify page: [frontend/src/components/auth/VerifyToken.tsx](mdc:frontend/src/components/auth/VerifyToken.tsx)
+- API: [frontend/src/services/authApi.ts](mdc:frontend/src/services/authApi.ts)
+
+## Documentation
+- See [docs/README.md](mdc:docs/README.md) for index and links to guides.
+

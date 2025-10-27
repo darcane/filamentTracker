@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+# Security, Env, and Auth Rules
+
+- Secrets are loaded via backend `config/email.ts` and `config/jwt.ts` using `dotenv.config()`.
+- Never hardcode secrets; use `.env` and do not access envs directly from random files.
+- Cookies: use HttpOnly, `sameSite: 'lax'`, and `secure` in production.
+- Auth strategy: passwordless magic links + JWT access/refresh, sessions stored in SQLite.
+- Rate limiting must use `ipKeyGenerator(req)` for IPv6 safety in any custom keyGenerator.
+- All DB queries must be scoped by `user_id` for multi-user isolation.
+- Do not write or read legacy JSON files; data lives in SQLite `backend/data/filaments.db`.
+

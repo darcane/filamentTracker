@@ -55,11 +55,37 @@ export const CustomThemeProvider: React.FC<CustomThemeProviderProps> = ({ childr
         fontWeight: 600,
       },
     },
+    transitions: {
+      duration: {
+        shortest: 150,
+        shorter: 200,
+        short: 250,
+        standard: 300,
+        complex: 375,
+        enteringScreen: 225,
+        leavingScreen: 195,
+      },
+    },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            transition: 'background-color 0.3s ease-in-out, color 0.3s ease-in-out',
+          },
+        },
+      },
       MuiPaper: {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
+            transition: 'background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            transition: 'background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
           },
         },
       },

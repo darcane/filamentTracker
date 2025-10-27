@@ -1,0 +1,13 @@
+---
+globs: *.ts,*.tsx
+---
+# TypeScript & React Style Rules
+
+- Prefer explicit parameter types for callback args when TypeScript cannot infer them (e.g., sqlite callbacks `err: any`).
+- Avoid calling functions in `useEffect` before their definitions; define functions first, then reference them in effects.
+- Use early returns and avoid deep nesting.
+- Keep API clients in `frontend/src/services` and avoid duplicating `axios` config.
+- Do not import backend-only packages on the frontend (`jsonwebtoken`, `cookie-parser`, `resend`, `dotenv`, `express-rate-limit`).
+- Use `useCallback` for stable function references passed to hooks/components.
+- Keep environment/config access centralized in backend `config/*` files.
+
