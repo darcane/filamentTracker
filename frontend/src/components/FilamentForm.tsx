@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Paper,
   Typography,
@@ -52,6 +52,16 @@ const FilamentForm: React.FC<FilamentFormProps> = ({ onFilamentAdded, onError })
 
   const [loading, setLoading] = useState(false);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleInputChange = (field: keyof CreateFilamentRequest) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
@@ -86,8 +96,13 @@ const FilamentForm: React.FC<FilamentFormProps> = ({ onFilamentAdded, onError })
         amount: 1000,
       }));
 
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Auto-collapse after successful add (optional)
-      setTimeout(() => setLastAdded(null), 5000);
+      timeoutRef.current = setTimeout(() => setLastAdded(null), 5000);
 
     } catch (error) {
       onError('Failed to add filament');
