@@ -84,13 +84,14 @@ export class AuthService {
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
     await databaseService.createSession(user.id, refreshToken, sessionExpiry);
 
-    // Send welcome email for new users (optional)
+    // Send welcome email for new users and mark as verified
     if (user.email_verified === 0) {
+      await databaseService.markEmailAsVerified(user.id);
       emailService.sendWelcomeEmail(user.email);
     }
 
     return {
-      user,
+      user: { ...user, email_verified: 1 }, // Return updated user
       accessToken,
       refreshToken,
     };
@@ -128,13 +129,14 @@ export class AuthService {
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
     await databaseService.createSession(user.id, refreshToken, sessionExpiry);
 
-    // Send welcome email for new users (optional)
+    // Send welcome email for new users and mark as verified
     if (user.email_verified === 0) {
+      await databaseService.markEmailAsVerified(user.id);
       emailService.sendWelcomeEmail(user.email);
     }
 
     return {
-      user,
+      user: { ...user, email_verified: 1 }, // Return updated user
       accessToken,
       refreshToken,
     };
