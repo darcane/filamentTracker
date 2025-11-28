@@ -1,0 +1,42 @@
+---
+alwaysApply: true
+---
+# Documentation Requirements
+
+When making changes to the codebase, always consider whether documentation needs to be updated.
+
+## When to Update Documentation
+
+Documentation updates are **required** when:
+
+1. **API Changes**: Adding, modifying, or removing API endpoints
+2. **Data Model Changes**: Modifying database schema or TypeScript interfaces
+3. **Configuration Changes**: Adding new environment variables or config options
+4. **Authentication/Security**: Any changes to auth flow or security measures
+5. **New Features**: Adding user-facing features that need user documentation
+6. **Breaking Changes**: Any changes that affect existing functionality
+
+## Documentation Files
+
+- `docs/API.md` - API endpoints and usage
+- `docs/AUTHENTICATION.md` - Auth flow and security
+- `docs/DATA_MODELS.md` - Database schema and types
+- `docs/DEPLOYMENT.md` - Deployment instructions
+- `docs/DEVELOPMENT.md` - Development setup and guidelines
+- `docs/HOME_ASSISTANT.md` - Home Assistant integration
+- `docs/INSTALLATION.md` - Installation instructions
+
+## Checklist Before PR
+
+- [ ] Does this change add/modify API endpoints? → Update `API.md`
+- [ ] Does this change the database schema? → Update `DATA_MODELS.md`
+- [ ] Does this change auth/security? → Update `AUTHENTICATION.md`
+- [ ] Does this add new config/env vars? → Update relevant docs
+- [ ] Is this a new user-facing feature? → Update relevant docs
+
+## Documentation Style
+
+- Use clear, concise language
+- Include code examples where helpful
+- Keep examples up-to-date with actual code
+- Use consistent formatting (Markdown)
