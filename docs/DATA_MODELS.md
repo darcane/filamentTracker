@@ -79,6 +79,7 @@ interface Session {
   expires_at: string;            // ISO timestamp of expiration (30 days)
   created_at: string;            // ISO timestamp of creation
   last_used: string;             // ISO timestamp of last use
+  remember_me: number;           // Boolean as integer (0/1) - persist cookies or use session cookies
 }
 ```
 

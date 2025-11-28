@@ -54,9 +54,13 @@ class DatabaseService {
         expires_at TEXT NOT NULL,
         created_at TEXT NOT NULL,
         last_used TEXT NOT NULL,
+        remember_me INTEGER DEFAULT 1,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
+
+    // Migrate sessions table to add remember_me column
+    this.migrateSessionsTable();
 
     // Create cookie consent table
     this.db.exec(`
@@ -161,6 +165,29 @@ class DatabaseService {
           console.log('✅ user_id column already exists');
         }
       });
+    });
+  }
+
+  private migrateSessionsTable(): void {
+    // Check if remember_me column exists, if not add it
+    this.db.all("PRAGMA table_info(sessions)", (err, rows: any[]) => {
+      if (err) {
+        console.error('Error checking sessions table schema:', err);
+        return;
+      }
+      
+      const hasRememberMeColumn = rows.some((row: any) => row.name === 'remember_me');
+      
+      if (!hasRememberMeColumn) {
+        console.log('🔄 Adding remember_me column to sessions table...');
+        this.db.run("ALTER TABLE sessions ADD COLUMN remember_me INTEGER DEFAULT 1", (err) => {
+          if (err) {
+            console.error('Error adding remember_me column:', err);
+          } else {
+            console.log('✅ Added remember_me column to sessions table');
+          }
+        });
+      }
     });
   }
 
@@ -481,24 +508,24 @@ class DatabaseService {
   }
 
   // Session management
-  createSession(userId: string, refreshToken: string, expiresAt: string): Promise<void> {
+  createSession(userId: string, refreshToken: string, expiresAt: string, rememberMe: boolean = true): Promise<void> {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
       const id = require('uuid').v4();
       
       const stmt = this.db.prepare(`
-        INSERT INTO sessions (id, user_id, refresh_token, expires_at, created_at, last_used)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO sessions (id, user_id, refresh_token, expires_at, created_at, last_used, remember_me)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
 
-      stmt.run(id, userId, refreshToken, expiresAt, now, now, (err: any) => {
+      stmt.run(id, userId, refreshToken, expiresAt, now, now, rememberMe ? 1 : 0, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
     });
   }
 
-  getSessionByRefreshToken(refreshToken: string): Promise<{ id: string; user_id: string; refresh_token: string; expires_at: string; created_at: string; last_used: string } | null> {
+  getSessionByRefreshToken(refreshToken: string): Promise<{ id: string; user_id: string; refresh_token: string; expires_at: string; created_at: string; last_used: string; remember_me: number } | null> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare('SELECT * FROM sessions WHERE refresh_token = ?');
       stmt.get(refreshToken, (err, row: any) => {

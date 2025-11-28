@@ -205,7 +205,7 @@ router.post('/verify-code', verifyRateLimit, async (req, res) => {
       return res.status(400).json({ error: 'Code must be a 6-digit number' });
     }
 
-    const authResponse = await authService.verifyCode(email, code);
+    const authResponse = await authService.verifyCode(email, code, rememberMe);
 
     // Set httpOnly cookies with appropriate expiry based on rememberMe
     res.cookie('access_token', authResponse.accessToken, getCookieOptions(rememberMe));
@@ -255,11 +255,9 @@ router.post('/refresh', refreshRateLimit, async (req, res) => {
 
     const tokens = await authService.refreshToken(refreshToken);
 
-    // For refresh, we maintain persistent cookies since if the user is refreshing,
-    // they had a valid refresh token (either session or persistent)
-    // The cookie type is determined at login time
-    res.cookie('access_token', tokens.accessToken, getCookieOptions(true));
-    res.cookie('refresh_token', tokens.refreshToken, getRefreshCookieOptions(true));
+    // Use the rememberMe preference from the original session to maintain consistency
+    res.cookie('access_token', tokens.accessToken, getCookieOptions(tokens.rememberMe));
+    res.cookie('refresh_token', tokens.refreshToken, getRefreshCookieOptions(tokens.rememberMe));
 
     res.json({ message: 'Token refreshed successfully' });
   } catch (error) {
