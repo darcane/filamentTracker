@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   async verifyToken(verifyData: VerifyTokenRequest): Promise<AuthResponse> {
-    const { token } = verifyData;
+    const { token, rememberMe = true } = verifyData;
 
     // Get magic token from database
     const magicTokenRecord = await databaseService.getMagicToken(token);
@@ -80,9 +80,9 @@ export class AuthService {
     const accessToken = tokenService.generateAccessToken(user.id, user.email);
     const refreshToken = tokenService.generateRefreshToken(user.id, 'session-id'); // We'll use session management later
 
-    // Create session
+    // Create session with rememberMe preference
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
-    await databaseService.createSession(user.id, refreshToken, sessionExpiry);
+    await databaseService.createSession(user.id, refreshToken, sessionExpiry, rememberMe);
 
     // Send welcome email for new users and mark as verified
     if (user.email_verified === 0) {
@@ -97,7 +97,7 @@ export class AuthService {
     };
   }
 
-  async verifyCode(email: string, code: string): Promise<AuthResponse> {
+  async verifyCode(email: string, code: string, rememberMe: boolean = true): Promise<AuthResponse> {
     // Find the user
     const user = await databaseService.getUserByEmail(email.toLowerCase().trim());
     if (!user) {
@@ -125,9 +125,9 @@ export class AuthService {
     const accessToken = tokenService.generateAccessToken(user.id, user.email);
     const refreshToken = tokenService.generateRefreshToken(user.id, 'session-id');
 
-    // Create session
+    // Create session with rememberMe preference
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
-    await databaseService.createSession(user.id, refreshToken, sessionExpiry);
+    await databaseService.createSession(user.id, refreshToken, sessionExpiry, rememberMe);
 
     // Send welcome email for new users and mark as verified
     if (user.email_verified === 0) {
@@ -142,7 +142,7 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; rememberMe: boolean }> {
     // Verify refresh token
     const payload = tokenService.verifyRefreshToken(refreshToken);
     if (!payload) {
@@ -166,6 +166,9 @@ export class AuthService {
       throw new Error('User not found');
     }
 
+    // Preserve the rememberMe preference from the original session
+    const rememberMe = session.remember_me === 1;
+
     // Update session last used
     await databaseService.updateSessionLastUsed(session.id);
 
@@ -173,14 +176,15 @@ export class AuthService {
     const newAccessToken = tokenService.generateAccessToken(user.id, user.email);
     const newRefreshToken = tokenService.generateRefreshToken(user.id, session.id);
 
-    // Update session with new refresh token
+    // Update session with new refresh token, preserving rememberMe preference
     const sessionExpiry = tokenService.getTokenExpiry(30 * 24 * 60); // 30 days
     await databaseService.deleteSession(session.id);
-    await databaseService.createSession(user.id, newRefreshToken, sessionExpiry);
+    await databaseService.createSession(user.id, newRefreshToken, sessionExpiry, rememberMe);
 
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
+      rememberMe,
     };
   }
 

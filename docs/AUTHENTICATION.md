@@ -53,6 +53,7 @@ Filamentory uses **passwordless authentication** with magic links and 6-digit co
 ### Session Types
 - **Persistent Session** (`rememberMe: true`): Cookies persist for 30 days
 - **Session Cookies** (`rememberMe: false`): Cookies expire when browser closes
+- **Preference Preserved**: The `rememberMe` preference is stored in the session and maintained during token refresh
 
 ## Data Models
 
@@ -89,6 +90,7 @@ interface Session {
   expires_at: string;
   created_at: string;
   last_used: string;
+  remember_me: number; // 1 = persistent cookies, 0 = session cookies
 }
 ```
 

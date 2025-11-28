@@ -23,6 +23,7 @@ export interface Session {
   expires_at: string;
   created_at: string;
   last_used: string;
+  remember_me: number;
 }
 
 export interface LoginRequest {
