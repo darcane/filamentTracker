@@ -559,6 +559,7 @@ class DatabaseService {
   updateNote(noteId: string, userId: string, title: string, content: string, category: string): Promise<{ id: string; user_id: string; title: string; content: string; category: string; created_at: string; updated_at: string } | null> {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
+      const db = this.db; // Store reference to avoid 'this' context issues in callback
       
       const stmt = this.db.prepare(`
         UPDATE notes 
@@ -571,8 +572,8 @@ class DatabaseService {
         else if (this.changes === 0) {
           resolve(null);
         } else {
-          // Get updated note
-          const getStmt = this.db.prepare('SELECT * FROM notes WHERE id = ? AND user_id = ?');
+          // Get updated note - use stored db reference instead of this.db
+          const getStmt = db.prepare('SELECT * FROM notes WHERE id = ? AND user_id = ?');
           getStmt.get(noteId, userId, (err: any, row: any) => {
             if (err) reject(err);
             else resolve(row);
