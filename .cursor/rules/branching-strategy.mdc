@@ -20,16 +20,39 @@ Examples:
 
 ## Workflow
 
-1. **Create a branch** from `main` for each issue/feature
-2. **Make commits** with clear, descriptive messages following conventional commits:
+1. **Sync with origin/main** before starting work:
+   ```bash
+   git fetch origin
+   git checkout main
+   git pull origin main
+   ```
+2. **Create a branch** from `main` for each issue/feature
+3. **Make commits** with clear, descriptive messages following conventional commits:
    - `fix:` for bug fixes
    - `feat:` for new features
    - `refactor:` for code refactoring
    - `docs:` for documentation changes
    - `chore:` for maintenance tasks
-3. **Push the branch** and create a Pull Request
-4. **Reference issues** in PR description with `Fixes #<issue-number>`
-5. **Merge to main** after review/approval
+4. **Before pushing**, rebase on latest origin/main:
+   ```bash
+   git fetch origin
+   git rebase origin/main
+   ```
+5. **Push the branch** and create a Pull Request
+6. **Reference issues** in PR description with `Fixes #<issue-number>`
+7. **Merge to main** after review/approval
+
+## Issue Workflow (Required)
+
+When starting work on a GitHub issue:
+
+1. **Always rebase** with latest `origin/main` before creating your branch
+2. **Create the feature/fix branch** following naming conventions
+3. **Implement the changes** with proper commits
+4. **Rebase again** before pushing to ensure branch is up to date
+5. **Create a Pull Request** after implementation is complete
+   - Link to the issue using `Fixes #<issue-number>` in the PR body
+   - This auto-closes the issue when PR is merged
 
 ## Commit Message Format
 
