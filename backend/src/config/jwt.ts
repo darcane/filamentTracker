@@ -16,4 +16,7 @@ export const COOKIE_CONFIG = {
   httpOnly: true,
   accessTokenMaxAge: 15 * 60 * 1000, // 15 minutes
   refreshTokenMaxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  // Session cookie (no maxAge = expires when browser closes)
+  sessionAccessTokenMaxAge: undefined as number | undefined,
+  sessionRefreshTokenMaxAge: undefined as number | undefined,
 };

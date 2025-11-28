@@ -7,6 +7,8 @@ import {
   Box,
   Alert,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { Email as EmailIcon } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
@@ -18,6 +20,7 @@ const LoginForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showCodeEntry, setShowCodeEntry] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +41,7 @@ const LoginForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      await login(email.trim());
+      await login(email.trim(), rememberMe);
       setSuccess(true);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to send magic link');
@@ -51,6 +54,7 @@ const LoginForm: React.FC = () => {
     return (
       <CodeEntryForm
         email={email}
+        rememberMe={rememberMe}
         onSuccess={() => {
           setShowCodeEntry(false);
           setSuccess(false);
@@ -127,10 +131,23 @@ const LoginForm: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
-          sx={{ mb: 3 }}
+          sx={{ mb: 2 }}
           placeholder="your@email.com"
           autoComplete="email"
           autoFocus
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              disabled={loading}
+              color="primary"
+            />
+          }
+          label="Keep me logged in"
+          sx={{ mb: 2 }}
         />
 
         <Button

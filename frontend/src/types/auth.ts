@@ -9,6 +9,7 @@ export interface User {
 
 export interface LoginRequest {
   email: string;
+  rememberMe?: boolean;
 }
 
 export interface AuthResponse {
@@ -16,10 +17,16 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
+  rememberMe?: boolean;
+}
+
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string) => Promise<void>;
+  login: (email: string, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   checkAuthStatus: () => Promise<void>;

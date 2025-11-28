@@ -27,10 +27,18 @@ export interface Session {
 
 export interface LoginRequest {
   email: string;
+  rememberMe?: boolean;
 }
 
 export interface VerifyTokenRequest {
   token: string;
+  rememberMe?: boolean;
+}
+
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
+  rememberMe?: boolean;
 }
 
 export interface AuthResponse {

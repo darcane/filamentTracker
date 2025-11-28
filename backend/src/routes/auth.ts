@@ -3,7 +3,27 @@ import { authService } from '../services/authService';
 import { authRateLimit, verifyRateLimit, refreshRateLimit } from '../middleware/rateLimiter';
 import { authenticateToken } from '../middleware/auth';
 import { COOKIE_CONFIG } from '../config/jwt';
-import { LoginRequest, VerifyTokenRequest } from '../types/auth';
+import { LoginRequest, VerifyTokenRequest, VerifyCodeRequest } from '../types/auth';
+
+// Helper function to get cookie options based on rememberMe setting
+const getCookieOptions = (rememberMe: boolean = true) => ({
+  httpOnly: true,
+  secure: COOKIE_CONFIG.secure,
+  sameSite: COOKIE_CONFIG.sameSite,
+  domain: COOKIE_CONFIG.domain,
+  // If rememberMe is false, don't set maxAge - cookies will be session cookies
+  ...(rememberMe ? { maxAge: COOKIE_CONFIG.accessTokenMaxAge } : {}),
+});
+
+const getRefreshCookieOptions = (rememberMe: boolean = true) => ({
+  httpOnly: true,
+  secure: COOKIE_CONFIG.secure,
+  sameSite: COOKIE_CONFIG.sameSite,
+  domain: COOKIE_CONFIG.domain,
+  path: '/api/auth/refresh',
+  // If rememberMe is false, don't set maxAge - cookies will be session cookies
+  ...(rememberMe ? { maxAge: COOKIE_CONFIG.refreshTokenMaxAge } : {}),
+});
 
 const router = express.Router();
 
@@ -73,6 +93,13 @@ router.post('/login', authRateLimit, async (req, res) => {
  *         schema:
  *           type: string
  *         description: Magic link token from email
+ *       - in: query
+ *         name: rememberMe
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: true
+ *         description: If true, creates persistent cookies (30 days). If false, creates session cookies that expire when browser closes.
  *     responses:
  *       200:
  *         description: Token verified successfully
@@ -94,31 +121,21 @@ router.post('/login', authRateLimit, async (req, res) => {
  */
 router.get('/verify', verifyRateLimit, async (req, res) => {
   try {
-    const verifyData: VerifyTokenRequest = { token: req.query.token as string };
+    const verifyData: VerifyTokenRequest = { 
+      token: req.query.token as string,
+      rememberMe: req.query.rememberMe !== 'false', // Default to true
+    };
 
     if (!verifyData.token) {
       return res.status(400).json({ error: 'Token is required' });
     }
 
     const authResponse = await authService.verifyToken(verifyData);
+    const rememberMe = verifyData.rememberMe ?? true;
 
-    // Set httpOnly cookies
-    res.cookie('access_token', authResponse.accessToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.accessTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-    });
-
-    res.cookie('refresh_token', authResponse.refreshToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.refreshTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-      path: '/api/auth/refresh',
-    });
+    // Set httpOnly cookies with appropriate expiry based on rememberMe
+    res.cookie('access_token', authResponse.accessToken, getCookieOptions(rememberMe));
+    res.cookie('refresh_token', authResponse.refreshToken, getRefreshCookieOptions(rememberMe));
 
     res.json({
       user: authResponse.user,
@@ -154,6 +171,10 @@ router.get('/verify', verifyRateLimit, async (req, res) => {
  *               code:
  *                 type: string
  *                 example: "123456"
+ *               rememberMe:
+ *                 type: boolean
+ *                 default: true
+ *                 description: If true, creates persistent cookies (30 days). If false, creates session cookies that expire when browser closes.
  *     responses:
  *       200:
  *         description: Code verified successfully
@@ -174,7 +195,7 @@ router.get('/verify', verifyRateLimit, async (req, res) => {
  */
 router.post('/verify-code', verifyRateLimit, async (req, res) => {
   try {
-    const { email, code } = req.body;
+    const { email, code, rememberMe = true }: VerifyCodeRequest = req.body;
 
     if (!email || !code) {
       return res.status(400).json({ error: 'Email and code are required' });
@@ -186,23 +207,9 @@ router.post('/verify-code', verifyRateLimit, async (req, res) => {
 
     const authResponse = await authService.verifyCode(email, code);
 
-    // Set httpOnly cookies
-    res.cookie('access_token', authResponse.accessToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.accessTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-    });
-
-    res.cookie('refresh_token', authResponse.refreshToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.refreshTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-      path: '/api/auth/refresh',
-    });
+    // Set httpOnly cookies with appropriate expiry based on rememberMe
+    res.cookie('access_token', authResponse.accessToken, getCookieOptions(rememberMe));
+    res.cookie('refresh_token', authResponse.refreshToken, getRefreshCookieOptions(rememberMe));
 
     res.json({
       user: authResponse.user,
@@ -248,23 +255,11 @@ router.post('/refresh', refreshRateLimit, async (req, res) => {
 
     const tokens = await authService.refreshToken(refreshToken);
 
-    // Set new httpOnly cookies
-    res.cookie('access_token', tokens.accessToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.accessTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-    });
-
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      secure: COOKIE_CONFIG.secure,
-      sameSite: COOKIE_CONFIG.sameSite,
-      maxAge: COOKIE_CONFIG.refreshTokenMaxAge,
-      domain: COOKIE_CONFIG.domain,
-      path: '/api/auth/refresh',
-    });
+    // For refresh, we maintain persistent cookies since if the user is refreshing,
+    // they had a valid refresh token (either session or persistent)
+    // The cookie type is determined at login time
+    res.cookie('access_token', tokens.accessToken, getCookieOptions(true));
+    res.cookie('refresh_token', tokens.refreshToken, getRefreshCookieOptions(true));
 
     res.json({ message: 'Token refreshed successfully' });
   } catch (error) {

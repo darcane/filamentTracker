@@ -28,6 +28,12 @@ Filamentory uses **passwordless authentication** with magic links and 6-digit co
 - ⚠️ **Expiration Handling**: Clear messaging when code expires
 - 🔙 **Back to Login**: Easy return to email entry
 
+### Keep Me Logged In
+- ✅ **Checkbox Option**: Users can choose to stay logged in
+- 📅 **Persistent Session**: When enabled, session lasts 30 days
+- 🚪 **Session Cookies**: When disabled, session ends when browser closes
+- 🔄 **Default Enabled**: "Keep me logged in" is checked by default
+
 ### Security Features
 - 🚫 **Token Invalidation**: Old tokens automatically invalidated
 - 🛡️ **Rate Limiting**: Protection against spam and abuse
@@ -38,11 +44,15 @@ Filamentory uses **passwordless authentication** with magic links and 6-digit co
 
 ### Authentication (Public)
 - `POST /api/auth/login` - Request magic link login
-- `GET /api/auth/verify?token=xxx` - Verify magic link token
-- `POST /api/auth/verify-code` - Verify 6-digit code manually
+- `GET /api/auth/verify?token=xxx&rememberMe=true` - Verify magic link token (rememberMe defaults to true)
+- `POST /api/auth/verify-code` - Verify 6-digit code manually (accepts rememberMe in body)
 - `POST /api/auth/refresh` - Refresh access token
 - `POST /api/auth/logout` - Logout user
 - `GET /api/auth/me` - Get current user info
+
+### Session Types
+- **Persistent Session** (`rememberMe: true`): Cookies persist for 30 days
+- **Session Cookies** (`rememberMe: false`): Cookies expire when browser closes
 
 ## Data Models
 
