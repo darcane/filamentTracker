@@ -411,6 +411,17 @@ class DatabaseService {
     });
   }
 
+  markEmailAsVerified(userId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const now = new Date().toISOString();
+      const stmt = this.db.prepare('UPDATE users SET email_verified = 1, updated_at = ? WHERE id = ?');
+      stmt.run(now, userId, (err: any) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
   // Magic token management
   createMagicToken(userId: string, token: string, expiresAt: string): Promise<void> {
     return new Promise((resolve, reject) => {
