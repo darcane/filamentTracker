@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+# Git Branching Strategy
+
+This project follows a structured branching strategy for organized development and collaboration.
+
+## Branch Naming Convention
+
+- **Feature branches**: `feature/<description>` or `feature/issue-<number>-<description>`
+- **Bug fix branches**: `fix/<description>` or `fix/issue-<number>-<description>`
+- **Hotfix branches**: `hotfix/<description>` (for urgent production fixes)
+- **Refactor branches**: `refactor/<description>`
+- **Documentation branches**: `docs/<description>`
+
+Examples:
+- `fix/issue-2-manual-code-login`
+- `feature/add-filament-export`
+- `refactor/database-service`
+
+## Workflow
+
+1. **Create a branch** from `main` for each issue/feature
+2. **Make commits** with clear, descriptive messages following conventional commits:
+   - `fix:` for bug fixes
+   - `feat:` for new features
+   - `refactor:` for code refactoring
+   - `docs:` for documentation changes
+   - `chore:` for maintenance tasks
+3. **Push the branch** and create a Pull Request
+4. **Reference issues** in PR description with `Fixes #<issue-number>`
+5. **Merge to main** after review/approval
+
+## Commit Message Format
+
+```
+<type>: <short description>
+
+<optional longer description>
+
+Fixes #<issue-number>
+```
+
+## Main Branch Protection
+
+- `main` branch should always be deployable
+- Direct commits to `main` are discouraged
+- All changes should go through Pull Requests
