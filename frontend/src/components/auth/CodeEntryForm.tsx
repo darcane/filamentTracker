@@ -14,11 +14,12 @@ import { useAuth } from '../../hooks/useAuth';
 
 interface CodeEntryFormProps {
   email: string;
+  rememberMe?: boolean;
   onSuccess: () => void;
   onBack: () => void;
 }
 
-const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, onSuccess, onBack }) => {
+const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, rememberMe = true, onSuccess, onBack }) => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,7 +64,7 @@ const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, onSuccess, onBack 
     setError('');
 
     try {
-      await authApi.verifyCode(email, code);
+      await authApi.verifyCode(email, code, rememberMe);
       // Update auth context to recognize the new session
       await checkAuthStatus();
       onSuccess();
@@ -79,7 +80,7 @@ const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, onSuccess, onBack 
     setError('');
 
     try {
-      await authApi.login(email);
+      await authApi.login(email, rememberMe);
       setTimeLeft(15 * 60);
       setIsExpired(false);
       setCode('');

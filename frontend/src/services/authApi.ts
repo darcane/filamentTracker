@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LoginRequest, AuthResponse, User } from '../types/auth';
+import { LoginRequest, AuthResponse, User, VerifyCodeRequest } from '../types/auth';
 
 const API_BASE_URL = '/api';
 
@@ -13,20 +13,20 @@ const api = axios.create({
 
 export const authApi = {
   // Request magic link login
-  login: async (email: string): Promise<{ message: string; email: string }> => {
-    const response = await api.post('/auth/login', { email });
+  login: async (email: string, rememberMe: boolean = true): Promise<{ message: string; email: string }> => {
+    const response = await api.post('/auth/login', { email, rememberMe });
     return response.data;
   },
 
   // Verify magic link token (handled by redirect)
-  verifyToken: async (token: string): Promise<AuthResponse> => {
-    const response = await api.get(`/auth/verify?token=${token}`);
+  verifyToken: async (token: string, rememberMe: boolean = true): Promise<AuthResponse> => {
+    const response = await api.get(`/auth/verify?token=${token}&rememberMe=${rememberMe}`);
     return response.data;
   },
 
   // Verify 6-digit code
-  verifyCode: async (email: string, code: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/verify-code', { email, code });
+  verifyCode: async (email: string, code: string, rememberMe: boolean = true): Promise<AuthResponse> => {
+    const response = await api.post('/auth/verify-code', { email, code, rememberMe } as VerifyCodeRequest);
     return response.data;
   },
 

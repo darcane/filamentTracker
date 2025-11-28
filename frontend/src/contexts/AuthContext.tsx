@@ -30,9 +30,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus();
   }, [checkAuthStatus]);
 
-  const login = useCallback(async (email: string): Promise<void> => {
+  const login = useCallback(async (email: string, rememberMe: boolean = true): Promise<void> => {
     try {
-      await authApi.login(email);
+      await authApi.login(email, rememberMe);
       // Don't set user here - wait for magic link verification
     } catch (error) {
       throw error;
