@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 interface AppLogoProps {
   size?: 'xsmall' | 'small' | 'medium' | 'large';
@@ -12,6 +12,9 @@ const AppLogo: React.FC<AppLogoProps> = ({
   showText = true,
   variant = 'horizontal'
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   const getSizeConfig = () => {
     switch (size) {
       case 'xsmall':
@@ -46,15 +49,20 @@ const AppLogo: React.FC<AppLogoProps> = ({
           width: iconSize,
           height: iconSize,
           borderRadius: '12%',
-          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-          border: '2px solid #1565c0',
+          background: isDarkMode
+            ? 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)'
+            : 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+          border: isDarkMode ? '2px solid #1565c0' : '2px solid #0d47a1',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           userSelect: 'none',
           cursor: 'default',
-          boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
+          boxShadow: isDarkMode
+            ? '0 2px 8px rgba(25, 118, 210, 0.3)'
+            : '0 2px 8px rgba(13, 71, 161, 0.4)',
+          transition: 'all 0.3s ease-in-out',
         }}
       >
         {/* Filament spool inside inventory box */}
@@ -159,13 +167,14 @@ const AppLogo: React.FC<AppLogoProps> = ({
           sx={{
             fontSize,
             fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            color: isDarkMode ? '#90caf9' : '#ffffff',
             textAlign: 'center',
             userSelect: 'none',
             cursor: 'default',
+            textShadow: isDarkMode
+              ? '0 2px 4px rgba(0, 0, 0, 0.3)'
+              : '0 2px 8px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.4)',
+            transition: 'color 0.3s ease-in-out, text-shadow 0.3s ease-in-out',
           }}
         >
           Filamentory
@@ -182,12 +191,13 @@ const AppLogo: React.FC<AppLogoProps> = ({
         sx={{
           fontSize,
           fontWeight: 'bold',
-          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          color: isDarkMode ? '#90caf9' : '#ffffff',
           userSelect: 'none',
           cursor: 'default',
+          textShadow: isDarkMode
+            ? '0 2px 4px rgba(0, 0, 0, 0.3)'
+            : '0 2px 8px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.4)',
+          transition: 'color 0.3s ease-in-out, text-shadow 0.3s ease-in-out',
         }}
       >
         Filamentory
