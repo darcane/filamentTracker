@@ -10,6 +10,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { authApi } from '../../services/authApi';
+import { useAuth } from '../../hooks/useAuth';
 
 interface CodeEntryFormProps {
   email: string;
@@ -23,6 +24,7 @@ const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, onSuccess, onBack 
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
   const [isExpired, setIsExpired] = useState(false);
+  const { checkAuthStatus } = useAuth();
 
   // Timer countdown
   useEffect(() => {
@@ -62,6 +64,8 @@ const CodeEntryForm: React.FC<CodeEntryFormProps> = ({ email, onSuccess, onBack 
 
     try {
       await authApi.verifyCode(email, code);
+      // Update auth context to recognize the new session
+      await checkAuthStatus();
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Invalid code. Please try again.');
