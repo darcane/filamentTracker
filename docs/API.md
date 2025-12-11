@@ -89,10 +89,19 @@ GET /api/auth/me
 
 ### 📦 Filaments (Protected)
 
+**Authentication Required**: All filament endpoints require authentication via HttpOnly cookies or Bearer token. Unauthenticated requests will receive a `401 Unauthorized` response.
+
+**User Isolation**: Each user can only access, create, update, and delete their own filaments. Requests return data scoped to the authenticated user's ID.
+
 #### Get All Filaments
 ```http
 GET /api/filaments
+Authorization: Bearer YOUR_ACCESS_TOKEN
+# OR use HttpOnly cookies (automatically sent by browser)
 ```
+
+**Error Responses:**
+- `401 Unauthorized` - Missing or invalid authentication token
 
 **Response:**
 ```json
@@ -203,10 +212,17 @@ DELETE /api/notes/:id
 
 ### 📊 Analytics (Protected)
 
+**Authentication Required**: All analytics endpoints require authentication. Returns statistics for the authenticated user's filaments only.
+
 #### Get Total Filament Count
 ```http
 GET /api/filaments/stats/total
+Authorization: Bearer YOUR_ACCESS_TOKEN
+# OR use HttpOnly cookies (automatically sent by browser)
 ```
+
+**Error Responses:**
+- `401 Unauthorized` - Missing or invalid authentication token
 
 **Response:**
 ```json
