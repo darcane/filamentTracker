@@ -1,9 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { databaseService } from '../services/database';
+import { authenticateToken } from '../middleware/auth';
 import { CreateFilamentRequest, UpdateFilamentRequest, ReduceAmountRequest } from '../types/filament';
-
-// Default user ID for non-authenticated requests (temporary solution)
-const DEFAULT_USER_ID = 'legacy-user-migration';
 
 const router = Router();
 
@@ -36,8 +34,10 @@ const router = Router();
  * /api/filaments:
  *   get:
  *     summary: Get all filaments
- *     description: Retrieve a list of all filaments in the inventory
+ *     description: Retrieve a list of all filaments in the inventory for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: List of filaments retrieved successfully
@@ -47,12 +47,14 @@ const router = Router();
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Filament'
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const filaments = await databaseService.getAllFilaments(DEFAULT_USER_ID);
+    const filaments = await databaseService.getAllFilaments(req.user!.id);
     res.json(filaments);
   } catch (error) {
     console.error('Error fetching filaments:', error);
@@ -65,8 +67,10 @@ router.get('/', async (req: Request, res: Response) => {
  * /api/filaments/{id}:
  *   get:
  *     summary: Get filament by ID
- *     description: Retrieve a specific filament by its unique identifier
+ *     description: Retrieve a specific filament by its unique identifier for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -83,15 +87,17 @@ router.get('/', async (req: Request, res: Response) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Filament'
+ *       401:
+ *         description: Not authenticated
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const filament = await databaseService.getFilamentById(id, DEFAULT_USER_ID);
+    const filament = await databaseService.getFilamentById(id, req.user!.id);
     
     if (!filament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -109,8 +115,10 @@ router.get('/:id', async (req: Request, res: Response) => {
  * /api/filaments:
  *   post:
  *     summary: Create new filament
- *     description: Add a new filament to the inventory
+ *     description: Add a new filament to the inventory for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -134,10 +142,12 @@ router.get('/:id', async (req: Request, res: Response) => {
  *               $ref: '#/components/schemas/Filament'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const filamentData: CreateFilamentRequest = req.body;
     
@@ -160,7 +170,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     const newFilament = await databaseService.createFilament({
       ...filamentData,
-      userId: DEFAULT_USER_ID,
+      userId: req.user!.id,
     });
     res.status(201).json(newFilament);
   } catch (error) {
@@ -174,8 +184,10 @@ router.post('/', async (req: Request, res: Response) => {
  * /api/filaments/{id}:
  *   put:
  *     summary: Update filament
- *     description: Update an existing filament in the inventory
+ *     description: Update an existing filament in the inventory for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -204,12 +216,14 @@ router.post('/', async (req: Request, res: Response) => {
  *               $ref: '#/components/schemas/Filament'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Not authenticated
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updates: UpdateFilamentRequest = req.body;
@@ -229,7 +243,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Currency must be SEK, EUR, or USD' });
     }
 
-    const updatedFilament = await databaseService.updateFilament(id, DEFAULT_USER_ID, updates);
+    const updatedFilament = await databaseService.updateFilament(id, req.user!.id, updates);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -247,8 +261,10 @@ router.put('/:id', async (req: Request, res: Response) => {
  * /api/filaments/{id}:
  *   delete:
  *     summary: Delete filament
- *     description: Remove a filament from the inventory
+ *     description: Remove a filament from the inventory for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -261,15 +277,17 @@ router.put('/:id', async (req: Request, res: Response) => {
  *     responses:
  *       204:
  *         description: Filament deleted successfully
+ *       401:
+ *         description: Not authenticated
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await databaseService.deleteFilament(id, DEFAULT_USER_ID);
+    const deleted = await databaseService.deleteFilament(id, req.user!.id);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -287,8 +305,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
  * /api/filaments/{id}/reduce:
  *   patch:
  *     summary: Reduce filament amount
- *     description: Reduce the amount of a filament (for Home Assistant integration)
+ *     description: Reduce the amount of a filament for the authenticated user (for Home Assistant integration)
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -315,12 +335,14 @@ router.delete('/:id', async (req: Request, res: Response) => {
  *               $ref: '#/components/schemas/Filament'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Not authenticated
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.patch('/:id/reduce', async (req: Request, res: Response) => {
+router.patch('/:id/reduce', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { amount }: ReduceAmountRequest = req.body;
@@ -329,7 +351,7 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Amount must be a positive number' });
     }
 
-    const updatedFilament = await databaseService.reduceFilamentAmount(id, DEFAULT_USER_ID, amount);
+    const updatedFilament = await databaseService.reduceFilamentAmount(id, req.user!.id, amount);
     
     if (!updatedFilament) {
       return res.status(404).json({ error: 'Filament not found' });
@@ -347,8 +369,10 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
  * /api/filaments/stats/total:
  *   get:
  *     summary: Get total filament count
- *     description: Get the total number of filaments in the inventory
+ *     description: Get the total number of filaments in the inventory for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Total count retrieved successfully
@@ -360,12 +384,14 @@ router.patch('/:id/reduce', async (req: Request, res: Response) => {
  *                 total:
  *                   type: number
  *                   example: 25
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/total', async (req: Request, res: Response) => {
+router.get('/stats/total', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const total = await databaseService.getTotalFilaments(DEFAULT_USER_ID);
+    const total = await databaseService.getTotalFilaments(req.user!.id);
     res.json({ total });
   } catch (error) {
     console.error('Error fetching total count:', error);
@@ -378,8 +404,10 @@ router.get('/stats/total', async (req: Request, res: Response) => {
  * /api/filaments/stats/value:
  *   get:
  *     summary: Get total inventory value by currency
- *     description: Get the total value of all filaments grouped by currency
+ *     description: Get the total value of all filaments grouped by currency for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Total value retrieved successfully
@@ -396,12 +424,14 @@ router.get('/stats/total', async (req: Request, res: Response) => {
  *                   total:
  *                     type: number
  *                     example: 1650.50
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/value', async (req: Request, res: Response) => {
+router.get('/stats/value', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const value = await databaseService.getTotalValue(DEFAULT_USER_ID);
+    const value = await databaseService.getTotalValue(req.user!.id);
     res.json(value);
   } catch (error) {
     console.error('Error fetching total value:', error);
@@ -414,8 +444,10 @@ router.get('/stats/value', async (req: Request, res: Response) => {
  * /api/filaments/stats/brands:
  *   get:
  *     summary: Get brand statistics
- *     description: Get the count of filaments grouped by brand
+ *     description: Get the count of filaments grouped by brand for the authenticated user
  *     tags: [Filaments]
+ *     security:
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Brand statistics retrieved successfully
@@ -432,12 +464,14 @@ router.get('/stats/value', async (req: Request, res: Response) => {
  *                   count:
  *                     type: number
  *                     example: 5
+ *       401:
+ *         description: Not authenticated
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/stats/brands', async (req: Request, res: Response) => {
+router.get('/stats/brands', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const brands = await databaseService.getBrandStats(DEFAULT_USER_ID);
+    const brands = await databaseService.getBrandStats(req.user!.id);
     res.json(brands);
   } catch (error) {
     console.error('Error fetching brand stats:', error);
